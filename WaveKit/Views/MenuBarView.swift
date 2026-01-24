@@ -49,14 +49,27 @@ struct MenuBarView: View {
     }
 
     private var emptyStateView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "plus.circle.dashed")
-                .font(.system(size: 32))
-                .foregroundColor(.secondary)
+        VStack(spacing: 16) {
+            Image(systemName: "water.waves")
+                .font(.system(size: 36))
+                .foregroundColor(.accentColor)
 
-            Text("No spots added")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+            VStack(spacing: 6) {
+                Text("Welcome to WaveKit")
+                    .font(.headline)
+
+                Text("Your surf forecast at a glance")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Go to any spot on Surfline.com", systemImage: "1.circle.fill")
+                Label("Copy the URL from your browser", systemImage: "2.circle.fill")
+                Label("Click + below to add it here", systemImage: "3.circle.fill")
+            }
+            .font(.caption)
+            .foregroundColor(.secondary)
 
             Button("Add Your First Spot") {
                 openWindow(id: "addspot")
@@ -65,7 +78,8 @@ struct MenuBarView: View {
             .controlSize(.small)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 30)
+        .padding(.vertical, 24)
+        .padding(.horizontal, 16)
     }
 
     private var spotListView: some View {
