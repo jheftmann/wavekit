@@ -1,0 +1,14 @@
+# Build artifacts
+.build/
+DerivedData/
+*.xcuserstate
+
+# Debug logs
+/tmp/surfline*.log
+
+# macOS
+.DS_Store
+
+# Xcode user data
+xcuserdata/
+*.xcworkspace/xcuserdata/
