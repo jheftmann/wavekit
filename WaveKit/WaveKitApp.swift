@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct SurflineFavoritesApp: App {
+struct WaveKitApp: App {
     @StateObject private var api = SurflineAPI.shared
     @StateObject private var favoritesStore = FavoritesStore.shared
     @StateObject private var authManager = AuthManager.shared
@@ -14,7 +14,7 @@ struct SurflineFavoritesApp: App {
                 authManager: authManager
             )
         } label: {
-            Label("Surfline", systemImage: "water.waves")
+            Label("WaveKit", systemImage: "water.waves")
         }
         .menuBarExtraStyle(.window)
 

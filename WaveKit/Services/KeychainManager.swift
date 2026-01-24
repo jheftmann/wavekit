@@ -12,7 +12,7 @@ enum KeychainError: Error {
 final class KeychainManager {
     static let shared = KeychainManager()
 
-    private let service = "com.surflinefavorites.auth"
+    private let service = "com.wavekit.auth"
 
     private init() {}
 

@@ -2,15 +2,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "SurflineFavorites",
+    name: "WaveKit",
     platforms: [
         .macOS(.v14)
     ],
     targets: [
         .executableTarget(
-            name: "SurflineFavorites",
-            path: "SurflineFavorites",
-            exclude: ["Resources/Assets.xcassets", "SurflineFavorites.entitlements"],
+            name: "WaveKit",
+            path: "WaveKit",
+            exclude: ["Resources/Assets.xcassets", "WaveKit.entitlements"],
             swiftSettings: [
                 .unsafeFlags(["-parse-as-library"])
             ]

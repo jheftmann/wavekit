@@ -116,7 +116,7 @@ struct SettingsView: View {
             // Footer
             Divider()
             HStack {
-                Text("Surfline Favorites v1.0")
+                Text("WaveKit v1.0")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 Spacer()

@@ -11,7 +11,7 @@ struct MenuBarView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Label("Surfline Favorites", systemImage: "water.waves")
+                Label("WaveKit", systemImage: "water.waves")
                     .font(.headline)
                 Spacer()
                 if api.isLoading {
