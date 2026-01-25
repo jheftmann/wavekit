@@ -127,8 +127,10 @@ final class SurflineAPI: ObservableObject {
                 abs(entry1.timestamp - targetTimestamp) < abs(entry2.timestamp - targetTimestamp)
             })
 
-            // Get primary swell (first in array)
-            let primarySwell = waveEntry?.swells?.first
+            // Get primary swell (largest height, excluding zero values)
+            let primarySwell = waveEntry?.swells?
+                .filter { ($0.height ?? 0) > 0 }
+                .max(by: { ($0.height ?? 0) < ($1.height ?? 0) })
 
             let period = PeriodForecast(
                 label: label,
@@ -211,7 +213,10 @@ final class SurflineAPI: ObservableObject {
                 ratingAM: ratingAt(hour: 6),
                 ratingNoon: ratingAt(hour: 12),
                 ratingPM: ratingAt(hour: 18),
-                swellDirection: closestWave?.swells?.first?.direction
+                swellDirection: closestWave?.swells?
+                    .filter { ($0.height ?? 0) > 0 }
+                    .max(by: { ($0.height ?? 0) < ($1.height ?? 0) })?
+                    .direction
             )
 
             forecasts.append(forecast)

@@ -42,32 +42,20 @@ struct DayColumnView: View {
     let day: DayForecast
 
     var body: some View {
-        VStack(spacing: 2) {
-            // Star for good days
-            if day.isGoodDay {
-                Image(systemName: "star.fill")
-                    .font(.system(size: 8))
-                    .foregroundColor(.yellow)
-            } else {
-                Color.clear
-                    .frame(width: 8, height: 8)
+        VStack(spacing: 3) {
+            // Date label with star for good days
+            HStack(spacing: 2) {
+                if day.isGoodDay {
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 7))
+                        .foregroundColor(.yellow)
+                }
+                Text(day.dateLabel)
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
-
-            // Date label
-            Text(day.dateLabel)
-                .font(.system(size: 9, weight: .medium))
-                .foregroundColor(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-
-            // Wave height
-            Text(day.waveDisplay)
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
-
-            // Direction arrows
-            Text(day.directionArrows)
-                .font(.system(size: 10))
-                .foregroundColor(.secondary)
 
             // Rating bar (3 segments: AM, Noon, PM)
             HStack(spacing: 1) {
@@ -81,7 +69,12 @@ struct DayColumnView: View {
                     .fill(day.ratingPM.color)
                     .frame(width: 11, height: 4)
             }
+
+            // Wave height
+            Text(day.waveDisplay)
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
         }
+        .frame(height: 52)
         .frame(width: 50)
     }
 }

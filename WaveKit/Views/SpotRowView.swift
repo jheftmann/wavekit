@@ -43,34 +43,28 @@ struct PeriodColumnView: View {
     let period: PeriodForecast
 
     var body: some View {
-        VStack(spacing: 2) {
+        VStack(spacing: 3) {
             // Time label
             Text(period.label)
                 .font(.system(size: 9, weight: .medium))
                 .foregroundColor(.secondary)
 
-            // Rating bar
+            // Rating bar (above data)
             RatingBarView(rating: period.rating)
 
             // Wave height
             Text(period.waveDisplay)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
 
-            // Swell info (compact)
+            // Swell info
             if let height = period.swellHeight, let periodSec = period.swellPeriod {
-                HStack(spacing: 2) {
-                    Text(String(format: "%.1f", height))
-                        .font(.system(size: 9))
-                    Text("\(periodSec)s")
-                        .font(.system(size: 9))
-                        .foregroundColor(.secondary)
-                    Text(period.directionArrow)
-                        .font(.system(size: 10))
-                }
-                .foregroundColor(.secondary)
+                Text(String(format: "%.1fft %ds", height, periodSec))
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary)
             }
         }
         .frame(maxWidth: .infinity)
+        .frame(height: 52)
     }
 }
 

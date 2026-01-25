@@ -121,7 +121,7 @@ enum SurfRating: Int, Comparable {
         case .poor: return Color(red: 1.0, green: 0.6, blue: 0.0)        // Orange
         case .poorToFair: return Color(red: 0.95, green: 0.8, blue: 0.0) // Yellow
         case .fair: return Color(red: 0.2, green: 0.85, blue: 0.25)       // Green
-        case .fairToGood: return Color(red: 0.0, green: 0.75, blue: 0.55) // Teal-green
+        case .fairToGood: return Color(red: 0.25, green: 0.57, blue: 0.45) // #409173
         case .good: return Color(red: 0.0, green: 0.7, blue: 0.7)        // Cyan/Teal
         case .epic: return Color(red: 0.0, green: 0.6, blue: 0.8)        // Blue/Cyan
         case .unknown: return .secondary
@@ -168,9 +168,9 @@ struct PeriodForecast {
 
     var directionArrow: String {
         guard let dir = swellDirection else { return "" }
-        // Convert degrees to arrow (direction swell is coming FROM)
+        // Convert degrees to arrow (direction swell is traveling toward)
         let arrows = ["↓", "↙", "←", "↖", "↑", "↗", "→", "↘"]
-        let index = Int(round(dir / 45.0)) % 8
+        let index = (Int(round(dir / 45.0)) - 1 + 8) % 8
         return arrows[index]
     }
 }
@@ -211,7 +211,7 @@ struct DayForecast: Identifiable {
     var directionArrows: String {
         guard let dir = swellDirection else { return "" }
         let arrows = ["↓", "↙", "←", "↖", "↑", "↗", "→", "↘"]
-        let index = Int(round(dir / 45.0)) % 8
+        let index = (Int(round(dir / 45.0)) - 1 + 8) % 8
         return arrows[index]
     }
 

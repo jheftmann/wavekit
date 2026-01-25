@@ -18,13 +18,17 @@ struct MenuBarView: View {
             // Header with toggle
             VStack(spacing: 8) {
                 HStack {
-                    Label("WaveKit", systemImage: "water.waves")
+                    Text("WaveKit")
                         .font(.headline)
                     Spacer()
-                    if api.isLoading {
-                        ProgressView()
-                            .scaleEffect(0.6)
+                    Button {
+                        openWindow(id: "settings")
+                    } label: {
+                        Label("Settings", systemImage: "gear")
+                            .labelStyle(.iconOnly)
                     }
+                    .buttonStyle(.borderless)
+                    .help("Settings")
                 }
 
                 // View mode toggle (only show if logged in and has spots)
@@ -134,16 +138,6 @@ struct MenuBarView: View {
 
     private var footerView: some View {
         HStack {
-            // Settings button
-            Button {
-                openWindow(id: "settings")
-            } label: {
-                Label("Settings", systemImage: "gear")
-                    .labelStyle(.iconOnly)
-            }
-            .buttonStyle(.borderless)
-            .help("Settings")
-
             // Add spot button
             Button {
                 openWindow(id: "addspot")
@@ -156,25 +150,28 @@ struct MenuBarView: View {
 
             Spacer()
 
-            // Last updated
-            if let lastUpdated = api.lastUpdated {
-                Text("Updated \(lastUpdated.formatted(.relative(presentation: .named)))")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-
-            // Refresh button
-            Button {
-                Task {
-                    await api.fetchForecasts(for: favoritesStore.spots)
+            // Last updated + Refresh button
+            if api.isLoading {
+                ProgressView()
+                    .scaleEffect(0.6)
+            } else {
+                Button {
+                    Task {
+                        await api.fetchForecasts(for: favoritesStore.spots)
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        if let lastUpdated = api.lastUpdated {
+                            Text(shortTimeAgo(lastUpdated))
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        Image(systemName: "arrow.clockwise")
+                    }
                 }
-            } label: {
-                Label("Refresh", systemImage: "arrow.clockwise")
-                    .labelStyle(.iconOnly)
+                .buttonStyle(.borderless)
+                .help("Refresh forecasts")
             }
-            .buttonStyle(.borderless)
-            .disabled(api.isLoading)
-            .help("Refresh forecasts")
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -182,6 +179,19 @@ struct MenuBarView: View {
 
     private func openSpotInBrowser(_ spot: Spot) {
         NSWorkspace.shared.open(spot.surflineURL)
+    }
+
+    private func shortTimeAgo(_ date: Date) -> String {
+        let seconds = Int(-date.timeIntervalSinceNow)
+        if seconds < 60 {
+            return "now"
+        } else if seconds < 3600 {
+            return "\(seconds / 60)m"
+        } else if seconds < 86400 {
+            return "\(seconds / 3600)h"
+        } else {
+            return "\(seconds / 86400)d"
+        }
     }
 }
 
