@@ -88,13 +88,14 @@ struct ConditionPeriod: Codable {
 // MARK: - Rating Enum
 
 enum SurfRating: Int, Comparable {
+    case veryPoor = 0
     case poor = 1
     case poorToFair = 2
     case fair = 3
     case fairToGood = 4
     case good = 5
     case epic = 6
-    case unknown = 0
+    case unknown = -1
 
     static func < (lhs: SurfRating, rhs: SurfRating) -> Bool {
         lhs.rawValue < rhs.rawValue
@@ -102,6 +103,7 @@ enum SurfRating: Int, Comparable {
 
     init(from key: String?) {
         switch key?.uppercased() {
+        case "VERY_POOR": self = .veryPoor
         case "POOR": self = .poor
         case "POOR_TO_FAIR": self = .poorToFair
         case "FAIR": self = .fair
@@ -112,25 +114,28 @@ enum SurfRating: Int, Comparable {
         }
     }
 
+    // Colors matching Surfline's rating guide
     var color: Color {
         switch self {
-        case .poor: return .gray
-        case .poorToFair: return Color(red: 0.6, green: 0.6, blue: 0.4)
-        case .fair: return .yellow
-        case .fairToGood: return Color(red: 0.6, green: 0.8, blue: 0.2)
-        case .good: return .green
-        case .epic: return Color(red: 0.0, green: 0.8, blue: 0.4)
+        case .veryPoor: return Color(red: 0.95, green: 0.3, blue: 0.5)   // Pink/Red
+        case .poor: return Color(red: 1.0, green: 0.6, blue: 0.0)        // Orange
+        case .poorToFair: return Color(red: 0.95, green: 0.8, blue: 0.0) // Yellow
+        case .fair: return Color(red: 0.2, green: 0.8, blue: 0.4)        // Green
+        case .fairToGood: return Color(red: 0.0, green: 0.8, blue: 0.4)  // Green
+        case .good: return Color(red: 0.0, green: 0.7, blue: 0.7)        // Cyan/Teal
+        case .epic: return Color(red: 0.0, green: 0.6, blue: 0.8)        // Blue/Cyan
         case .unknown: return .secondary
         }
     }
 
     var dotCount: Int {
         switch self {
-        case .poor: return 1
-        case .poorToFair: return 2
-        case .fair: return 3
-        case .fairToGood: return 4
-        case .good: return 5
+        case .veryPoor: return 1
+        case .poor: return 2
+        case .poorToFair: return 3
+        case .fair: return 4
+        case .fairToGood: return 5
+        case .good: return 6
         case .epic: return 6
         case .unknown: return 0
         }
@@ -170,13 +175,71 @@ struct PeriodForecast {
     }
 }
 
+// MARK: - Day Forecast (for extended forecast view)
+
+struct DayForecast: Identifiable {
+    let id: Date
+    let date: Date
+    let waveMin: Double?
+    let waveMax: Double?
+    let ratingAM: SurfRating
+    let ratingNoon: SurfRating
+    let ratingPM: SurfRating
+    let swellDirection: Double?
+
+    var dateLabel: String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) {
+            return "Today"
+        } else if calendar.isDateInTomorrow(date) {
+            return "Tomorrow"
+        } else {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "EEE M/d"
+            return formatter.string(from: date)
+        }
+    }
+
+    var waveDisplay: String {
+        guard let min = waveMin, let max = waveMax else { return "—" }
+        if min == max || max - min < 0.5 {
+            return "\(Int(round(min)))ft"
+        }
+        return "\(Int(round(min)))-\(Int(round(max)))ft"
+    }
+
+    var directionArrows: String {
+        guard let dir = swellDirection else { return "" }
+        let arrows = ["↓", "↙", "←", "↖", "↑", "↗", "→", "↘"]
+        let index = Int(round(dir / 45.0)) % 8
+        return arrows[index]
+    }
+
+    var bestRating: SurfRating {
+        [ratingAM, ratingNoon, ratingPM].max() ?? .unknown
+    }
+
+    var isGoodDay: Bool {
+        bestRating >= .good
+    }
+}
+
 // MARK: - Combined Spot Forecast
 
 struct SpotForecast: Identifiable {
     let id: String  // spotId
     let spotName: String
-    let periods: [PeriodForecast]  // AM, Noon, PM
+    let periods: [PeriodForecast]  // AM, Noon, PM for today
+    let extendedForecast: [DayForecast]  // Multi-day forecast
     let timestamp: Date
+
+    init(id: String, spotName: String, periods: [PeriodForecast], extendedForecast: [DayForecast] = [], timestamp: Date) {
+        self.id = id
+        self.spotName = spotName
+        self.periods = periods
+        self.extendedForecast = extendedForecast
+        self.timestamp = timestamp
+    }
 
     // Convenience for best rating of the day
     var bestRating: SurfRating {

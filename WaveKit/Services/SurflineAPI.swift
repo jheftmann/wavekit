@@ -73,9 +73,10 @@ final class SurflineAPI: ObservableObject {
     }
 
     private func fetchForecast(for spot: Spot) async -> SpotForecast? {
-        // Fetch wave and rating data in parallel
-        async let waveTask = fetchWave(spotId: spot.id)
-        async let ratingTask = fetchRating(spotId: spot.id)
+        // Fetch wave and rating data in parallel (extended days if logged in)
+        let days = authManager.isLoggedIn ? 16 : 1
+        async let waveTask = fetchWave(spotId: spot.id, days: days)
+        async let ratingTask = fetchRating(spotId: spot.id, days: days)
 
         let (wave, rating) = await (waveTask, ratingTask)
 
@@ -89,12 +90,16 @@ final class SurflineAPI: ObservableObject {
         // Build period forecasts for AM (6am), Noon (12pm), PM (6pm)
         let periods = buildPeriodForecasts(wave: wave, rating: rating)
 
+        // Build extended forecast (daily)
+        let extendedForecast = buildExtendedForecast(wave: wave, rating: rating)
+
         guard !periods.isEmpty else { return nil }
 
         return SpotForecast(
             id: spot.id,
             spotName: spotName,
             periods: periods,
+            extendedForecast: extendedForecast,
             timestamp: Date()
         )
     }
@@ -141,18 +146,94 @@ final class SurflineAPI: ObservableObject {
         return periods
     }
 
-    private func fetchWave(spotId: String) async -> WaveForecastResponse? {
+    private func buildExtendedForecast(wave: WaveForecastResponse?, rating: RatingForecastResponse?) -> [DayForecast] {
+        let calendar = Calendar.current
+
+        // Group wave data by day
+        var dayData: [Date: (waves: [WaveEntry], ratings: [RatingEntry])] = [:]
+
+        // Process wave entries
+        if let waveEntries = wave?.data?.wave {
+            for entry in waveEntries {
+                let date = Date(timeIntervalSince1970: TimeInterval(entry.timestamp))
+                let dayStart = calendar.startOfDay(for: date)
+                if dayData[dayStart] == nil {
+                    dayData[dayStart] = (waves: [], ratings: [])
+                }
+                dayData[dayStart]?.waves.append(entry)
+            }
+        }
+
+        // Process rating entries
+        if let ratingEntries = rating?.data?.rating {
+            for entry in ratingEntries {
+                let date = Date(timeIntervalSince1970: TimeInterval(entry.timestamp))
+                let dayStart = calendar.startOfDay(for: date)
+                if dayData[dayStart] == nil {
+                    dayData[dayStart] = (waves: [], ratings: [])
+                }
+                dayData[dayStart]?.ratings.append(entry)
+            }
+        }
+
+        // Build daily forecasts
+        var forecasts: [DayForecast] = []
+        for (dayStart, data) in dayData.sorted(by: { $0.key < $1.key }) {
+            // Get noon entry for representative values (or average)
+            let noonTime = calendar.date(byAdding: .hour, value: 12, to: dayStart)!
+            let noonTimestamp = Int(noonTime.timeIntervalSince1970)
+
+            let closestWave = data.waves.min(by: {
+                abs($0.timestamp - noonTimestamp) < abs($1.timestamp - noonTimestamp)
+            })
+
+            // Get min/max for the day
+            let dayWaveMin = data.waves.compactMap { $0.surf?.min }.min()
+            let dayWaveMax = data.waves.compactMap { $0.surf?.max }.max()
+
+            // Get ratings for AM (6am), Noon (12pm), PM (6pm)
+            func ratingAt(hour: Int) -> SurfRating {
+                guard let targetTime = calendar.date(byAdding: .hour, value: hour, to: dayStart) else {
+                    return .unknown
+                }
+                let targetTimestamp = Int(targetTime.timeIntervalSince1970)
+                let closest = data.ratings.min(by: {
+                    abs($0.timestamp - targetTimestamp) < abs($1.timestamp - targetTimestamp)
+                })
+                return SurfRating(from: closest?.rating?.key)
+            }
+
+            let forecast = DayForecast(
+                id: dayStart,
+                date: dayStart,
+                waveMin: dayWaveMin,
+                waveMax: dayWaveMax,
+                ratingAM: ratingAt(hour: 6),
+                ratingNoon: ratingAt(hour: 12),
+                ratingPM: ratingAt(hour: 18),
+                swellDirection: closestWave?.swells?.first?.direction
+            )
+
+            forecasts.append(forecast)
+        }
+
+        return forecasts
+    }
+
+    private func fetchWave(spotId: String, days: Int = 1) async -> WaveForecastResponse? {
         await fetch(
             endpoint: "wave",
             spotId: spotId,
+            days: days,
             responseType: WaveForecastResponse.self
         )
     }
 
-    private func fetchRating(spotId: String) async -> RatingForecastResponse? {
+    private func fetchRating(spotId: String, days: Int = 1) async -> RatingForecastResponse? {
         await fetch(
             endpoint: "rating",
             spotId: spotId,
+            days: days,
             responseType: RatingForecastResponse.self
         )
     }
@@ -160,9 +241,10 @@ final class SurflineAPI: ObservableObject {
     private func fetch<T: Decodable>(
         endpoint: String,
         spotId: String,
+        days: Int = 1,
         responseType: T.Type
     ) async -> T? {
-        let url = URL(string: "\(baseURL)/\(endpoint)?spotId=\(spotId)&days=1")!
+        let url = URL(string: "\(baseURL)/\(endpoint)?spotId=\(spotId)&days=\(days)")!
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"

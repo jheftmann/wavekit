@@ -1,22 +1,41 @@
 import SwiftUI
 
+enum ViewMode: String, CaseIterable {
+    case forecast = "Forecast"
+    case today = "Today"
+}
+
 struct MenuBarView: View {
     @ObservedObject var api: SurflineAPI
     @ObservedObject var favoritesStore: FavoritesStore
     @ObservedObject var authManager: AuthManager
 
     @Environment(\.openWindow) private var openWindow
+    @State private var viewMode: ViewMode = .forecast
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            HStack {
-                Label("WaveKit", systemImage: "water.waves")
-                    .font(.headline)
-                Spacer()
-                if api.isLoading {
-                    ProgressView()
-                        .scaleEffect(0.6)
+            // Header with toggle
+            VStack(spacing: 8) {
+                HStack {
+                    Label("WaveKit", systemImage: "water.waves")
+                        .font(.headline)
+                    Spacer()
+                    if api.isLoading {
+                        ProgressView()
+                            .scaleEffect(0.6)
+                    }
+                }
+
+                // View mode toggle (only show if logged in and has spots)
+                if authManager.isLoggedIn && !favoritesStore.spots.isEmpty {
+                    Picker("View", selection: $viewMode) {
+                        ForEach(ViewMode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
                 }
             }
             .padding(.horizontal, 12)
@@ -89,10 +108,17 @@ struct MenuBarView: View {
                     Button {
                         openSpotInBrowser(spot)
                     } label: {
-                        SpotRowView(
-                            spot: spot,
-                            forecast: api.forecasts[spot.id]
-                        )
+                        if viewMode == .today {
+                            SpotRowView(
+                                spot: spot,
+                                forecast: api.forecasts[spot.id]
+                            )
+                        } else {
+                            ForecastRowView(
+                                spot: spot,
+                                forecast: api.forecasts[spot.id]
+                            )
+                        }
                     }
                     .buttonStyle(.plain)
 
@@ -103,7 +129,7 @@ struct MenuBarView: View {
                 }
             }
         }
-        .frame(maxHeight: 300)
+        .frame(maxHeight: 400)
     }
 
     private var footerView: some View {
