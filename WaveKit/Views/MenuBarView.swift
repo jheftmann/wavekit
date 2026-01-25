@@ -112,13 +112,13 @@ struct MenuBarView: View {
                     Button {
                         openSpotInBrowser(spot)
                     } label: {
-                        if viewMode == .today {
-                            SpotRowView(
+                        if viewMode == .forecast {
+                            ForecastRowView(
                                 spot: spot,
                                 forecast: api.forecasts[spot.id]
                             )
                         } else {
-                            ForecastRowView(
+                            SpotRowView(
                                 spot: spot,
                                 forecast: api.forecasts[spot.id]
                             )
@@ -151,27 +151,30 @@ struct MenuBarView: View {
             Spacer()
 
             // Last updated + Refresh button
-            if api.isLoading {
-                ProgressView()
-                    .scaleEffect(0.6)
-            } else {
-                Button {
-                    Task {
-                        await api.fetchForecasts(for: favoritesStore.spots)
+            Button {
+                Task {
+                    await api.fetchForecasts(for: favoritesStore.spots)
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    if let lastUpdated = api.lastUpdated {
+                        Text(shortTimeAgo(lastUpdated))
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
                     }
-                } label: {
-                    HStack(spacing: 4) {
-                        if let lastUpdated = api.lastUpdated {
-                            Text(shortTimeAgo(lastUpdated))
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
+                    if api.isLoading {
+                        ProgressView()
+                            .scaleEffect(0.5)
+                            .frame(width: 14, height: 14)
+                    } else {
                         Image(systemName: "arrow.clockwise")
+                            .frame(width: 14, height: 14)
                     }
                 }
-                .buttonStyle(.borderless)
-                .help("Refresh forecasts")
             }
+            .buttonStyle(.borderless)
+            .disabled(api.isLoading)
+            .help("Refresh forecasts")
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)

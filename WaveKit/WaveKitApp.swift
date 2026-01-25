@@ -14,7 +14,11 @@ struct WaveKitApp: App {
                 authManager: authManager
             )
         } label: {
+            #if DEBUG
+            Label("WaveKit", systemImage: "water.waves.slash")
+            #else
             Label("WaveKit", systemImage: "water.waves")
+            #endif
         }
         .menuBarExtraStyle(.window)
 

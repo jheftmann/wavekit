@@ -73,12 +73,14 @@ final class SurflineAPI: ObservableObject {
     }
 
     private func fetchForecast(for spot: Spot) async -> SpotForecast? {
-        // Fetch wave and rating data in parallel (extended days if logged in)
+        // Fetch wave, rating, wind, and tide data in parallel
         let days = authManager.isLoggedIn ? 16 : 1
         async let waveTask = fetchWave(spotId: spot.id, days: days)
         async let ratingTask = fetchRating(spotId: spot.id, days: days)
+        async let windTask = fetchWind(spotId: spot.id)
+        async let tideTask = fetchTide(spotId: spot.id)
 
-        let (wave, rating) = await (waveTask, ratingTask)
+        let (wave, rating, wind, tide) = await (waveTask, ratingTask, windTask, tideTask)
 
         let spotName = wave?.associated?.location?.name ?? spot.name
 
@@ -88,10 +90,13 @@ final class SurflineAPI: ObservableObject {
         }
 
         // Build period forecasts for AM (6am), Noon (12pm), PM (6pm)
-        let periods = buildPeriodForecasts(wave: wave, rating: rating)
+        let periods = buildPeriodForecasts(wave: wave, rating: rating, wind: wind)
 
         // Build extended forecast (daily)
         let extendedForecast = buildExtendedForecast(wave: wave, rating: rating)
+
+        // Build tide events (high/low only)
+        let tideEvents = buildTideEvents(tide: tide)
 
         guard !periods.isEmpty else { return nil }
 
@@ -100,11 +105,12 @@ final class SurflineAPI: ObservableObject {
             spotName: spotName,
             periods: periods,
             extendedForecast: extendedForecast,
+            tideEvents: tideEvents,
             timestamp: Date()
         )
     }
 
-    private func buildPeriodForecasts(wave: WaveForecastResponse?, rating: RatingForecastResponse?) -> [PeriodForecast] {
+    private func buildPeriodForecasts(wave: WaveForecastResponse?, rating: RatingForecastResponse?, wind: WindForecastResponse?) -> [PeriodForecast] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
 
@@ -127,6 +133,11 @@ final class SurflineAPI: ObservableObject {
                 abs(entry1.timestamp - targetTimestamp) < abs(entry2.timestamp - targetTimestamp)
             })
 
+            // Find closest wind entry
+            let windEntry = wind?.data?.wind?.min(by: { entry1, entry2 in
+                abs(entry1.timestamp - targetTimestamp) < abs(entry2.timestamp - targetTimestamp)
+            })
+
             // Get primary swell (largest height, excluding zero values)
             let primarySwell = waveEntry?.swells?
                 .filter { ($0.height ?? 0) > 0 }
@@ -139,13 +150,41 @@ final class SurflineAPI: ObservableObject {
                 rating: SurfRating(from: ratingEntry?.rating?.key),
                 swellHeight: primarySwell?.height,
                 swellPeriod: primarySwell?.period,
-                swellDirection: primarySwell?.direction
+                swellDirection: primarySwell?.direction,
+                windSpeed: windEntry?.speed,
+                windGust: windEntry?.gust,
+                windDirection: windEntry?.direction,
+                windDirectionType: windEntry?.directionType
             )
 
             periods.append(period)
         }
 
         return periods
+    }
+
+    private func buildTideEvents(tide: TideForecastResponse?) -> [TideEvent] {
+        guard let tides = tide?.data?.tides else { return [] }
+
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
+
+        return tides
+            .filter { $0.type == "HIGH" || $0.type == "LOW" }
+            .filter { entry in
+                let date = Date(timeIntervalSince1970: TimeInterval(entry.timestamp))
+                return date >= today && date < tomorrow
+            }
+            .map { entry in
+                TideEvent(
+                    id: entry.timestamp,
+                    time: Date(timeIntervalSince1970: TimeInterval(entry.timestamp)),
+                    type: entry.type,
+                    height: entry.height
+                )
+            }
+            .sorted { $0.time < $1.time }
     }
 
     private func buildExtendedForecast(wave: WaveForecastResponse?, rating: RatingForecastResponse?) -> [DayForecast] {
@@ -189,9 +228,10 @@ final class SurflineAPI: ObservableObject {
                 abs($0.timestamp - noonTimestamp) < abs($1.timestamp - noonTimestamp)
             })
 
-            // Get min/max for the day
-            let dayWaveMin = data.waves.compactMap { $0.surf?.min }.min()
-            let dayWaveMax = data.waves.compactMap { $0.surf?.max }.max()
+            // Use noon values for wave height (matches Surfline display)
+            let waveMin = closestWave?.surf?.min
+            let waveMax = closestWave?.surf?.max
+            let wavePlus = closestWave?.surf?.plus ?? false
 
             // Get ratings for AM (6am), Noon (12pm), PM (6pm)
             func ratingAt(hour: Int) -> SurfRating {
@@ -208,8 +248,9 @@ final class SurflineAPI: ObservableObject {
             let forecast = DayForecast(
                 id: dayStart,
                 date: dayStart,
-                waveMin: dayWaveMin,
-                waveMax: dayWaveMax,
+                waveMin: waveMin,
+                waveMax: waveMax,
+                wavePlus: wavePlus,
                 ratingAM: ratingAt(hour: 6),
                 ratingNoon: ratingAt(hour: 12),
                 ratingPM: ratingAt(hour: 18),
@@ -240,6 +281,24 @@ final class SurflineAPI: ObservableObject {
             spotId: spotId,
             days: days,
             responseType: RatingForecastResponse.self
+        )
+    }
+
+    private func fetchWind(spotId: String) async -> WindForecastResponse? {
+        await fetch(
+            endpoint: "wind",
+            spotId: spotId,
+            days: 1,
+            responseType: WindForecastResponse.self
+        )
+    }
+
+    private func fetchTide(spotId: String) async -> TideForecastResponse? {
+        await fetch(
+            endpoint: "tides",
+            spotId: spotId,
+            days: 1,
+            responseType: TideForecastResponse.self
         )
     }
 

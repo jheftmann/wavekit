@@ -6,21 +6,56 @@ struct SpotRowView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            // Spot name
-            Text(forecast?.spotName ?? spot.name)
-                .font(.system(.body, weight: .medium))
-                .lineLimit(1)
+            // Spot name + tide
+            HStack {
+                Text(forecast?.spotName ?? spot.name)
+                    .font(.system(.body, weight: .medium))
+                    .lineLimit(1)
+                Spacer()
+                if let forecast = forecast, !forecast.tideEvents.isEmpty {
+                    TideCompactView(events: forecast.tideEvents)
+                }
+            }
+            .frame(height: 18)
 
             if let forecast = forecast {
-                // Period grid: AM | Noon | PM
-                HStack(spacing: 0) {
+                HStack(spacing: 8) {
                     ForEach(forecast.periods, id: \.label) { period in
-                        PeriodColumnView(period: period)
-                        if period.label != "PM" {
-                            Divider()
-                                .frame(height: 32)
-                                .padding(.horizontal, 4)
+                        VStack(alignment: .leading, spacing: 2) {
+                            // Header: label + rating
+                            HStack(spacing: 4) {
+                                Text(period.label)
+                                    .font(.system(size: 9, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                    .frame(width: 32, alignment: .leading)
+                                RatingBarView(rating: period.rating)
+                            }
+
+                            // Wave + Swell inline
+                            HStack(spacing: 4) {
+                                Text(period.waveDisplay)
+                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                if let h = period.swellHeight, let p = period.swellPeriod {
+                                    Text(String(format: "%.1f/%ds", h, p))
+                                        .font(.system(size: 9))
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+
+                            // Wind
+                            if let w = period.windDisplay {
+                                HStack(spacing: 2) {
+                                    Text(w)
+                                        .font(.system(size: 10))
+                                    Text("kts")
+                                        .font(.system(size: 8))
+                                    Text(period.windArrow)
+                                        .font(.system(size: 10))
+                                }
+                                .foregroundColor(.secondary)
+                            }
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
             } else {
@@ -35,36 +70,27 @@ struct SpotRowView: View {
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
+        .frame(height: 85, alignment: .top)
         .contentShape(Rectangle())
     }
 }
 
-struct PeriodColumnView: View {
-    let period: PeriodForecast
+struct TideCompactView: View {
+    let events: [TideEvent]
 
     var body: some View {
-        VStack(spacing: 3) {
-            // Time label
-            Text(period.label)
-                .font(.system(size: 9, weight: .medium))
+        HStack(spacing: 4) {
+            ForEach(events) { event in
+                HStack(spacing: 1) {
+                    Text(event.type == "HIGH" ? "▲" : "▼")
+                        .font(.system(size: 6))
+                        .foregroundColor(event.type == "HIGH" ? .blue : .secondary)
+                    Text(event.timeDisplay)
+                        .font(.system(size: 8))
+                }
                 .foregroundColor(.secondary)
-
-            // Rating bar (above data)
-            RatingBarView(rating: period.rating)
-
-            // Wave height
-            Text(period.waveDisplay)
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
-
-            // Swell info
-            if let height = period.swellHeight, let periodSec = period.swellPeriod {
-                Text(String(format: "%.1fft %ds", height, periodSec))
-                    .font(.system(size: 9))
-                    .foregroundColor(.secondary)
             }
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 52)
     }
 }
 
@@ -87,11 +113,18 @@ struct RatingBarView: View {
                 spotName: "Venice Breakwater",
                 periods: [
                     PeriodForecast(label: "AM", waveMin: 2, waveMax: 3, rating: .good,
-                                   swellHeight: 1.7, swellPeriod: 10, swellDirection: 190),
+                                   swellHeight: 1.7, swellPeriod: 10, swellDirection: 190,
+                                   windSpeed: 5, windGust: 8, windDirection: 45, windDirectionType: "Offshore"),
                     PeriodForecast(label: "Noon", waveMin: 2, waveMax: 3, rating: .fair,
-                                   swellHeight: 1.7, swellPeriod: 9, swellDirection: 190),
+                                   swellHeight: 1.7, swellPeriod: 9, swellDirection: 190,
+                                   windSpeed: 8, windGust: 12, windDirection: 270, windDirectionType: "Onshore"),
                     PeriodForecast(label: "PM", waveMin: 2, waveMax: 3, rating: .fairToGood,
-                                   swellHeight: 1.7, swellPeriod: 9, swellDirection: 190)
+                                   swellHeight: 1.7, swellPeriod: 9, swellDirection: 190,
+                                   windSpeed: 3, windGust: 5, windDirection: 180, windDirectionType: "Cross-shore")
+                ],
+                tideEvents: [
+                    TideEvent(id: 1, time: Date(), type: "HIGH", height: 4.5),
+                    TideEvent(id: 2, time: Date().addingTimeInterval(6*3600), type: "LOW", height: 1.2)
                 ],
                 timestamp: Date()
             )
@@ -100,26 +133,7 @@ struct RatingBarView: View {
         Divider()
 
         SpotRowView(
-            spot: Spot(id: "2", name: "El Porto", slug: "el-porto"),
-            forecast: SpotForecast(
-                id: "2",
-                spotName: "El Porto",
-                periods: [
-                    PeriodForecast(label: "AM", waveMin: 3, waveMax: 5, rating: .epic,
-                                   swellHeight: 2.1, swellPeriod: 14, swellDirection: 270),
-                    PeriodForecast(label: "Noon", waveMin: 3, waveMax: 4, rating: .good,
-                                   swellHeight: 2.0, swellPeriod: 13, swellDirection: 270),
-                    PeriodForecast(label: "PM", waveMin: 2, waveMax: 3, rating: .fair,
-                                   swellHeight: 1.8, swellPeriod: 12, swellDirection: 265)
-                ],
-                timestamp: Date()
-            )
-        )
-
-        Divider()
-
-        SpotRowView(
-            spot: Spot(id: "3", name: "Malibu", slug: "malibu"),
+            spot: Spot(id: "2", name: "Malibu", slug: "malibu"),
             forecast: nil
         )
     }

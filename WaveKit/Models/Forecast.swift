@@ -34,6 +34,7 @@ struct WaveEntry: Codable {
 struct SurfInfo: Codable {
     let min: Double
     let max: Double
+    let plus: Bool?
     let humanRelation: String?
 }
 
@@ -42,6 +43,49 @@ struct SwellInfo: Codable {
     let period: Int?
     let direction: Double?  // degrees
     let directionMin: Double?
+}
+
+// MARK: - Tide Forecast
+
+struct TideForecastResponse: Codable {
+    let associated: TideAssociated?
+    let data: TideData?
+}
+
+struct TideAssociated: Codable {
+    let tideLocation: TideLocation?
+}
+
+struct TideLocation: Codable {
+    let name: String?
+}
+
+struct TideData: Codable {
+    let tides: [TideEntry]?
+}
+
+struct TideEntry: Codable {
+    let timestamp: Int
+    let type: String  // "NORMAL", "HIGH", "LOW"
+    let height: Double
+}
+
+// MARK: - Wind Forecast
+
+struct WindForecastResponse: Codable {
+    let data: WindData?
+}
+
+struct WindData: Codable {
+    let wind: [WindEntry]?
+}
+
+struct WindEntry: Codable {
+    let timestamp: Int
+    let speed: Double
+    let direction: Double
+    let directionType: String?  // "Offshore", "Onshore", "Cross-shore"
+    let gust: Double?
 }
 
 // MARK: - Rating Forecast
@@ -142,6 +186,30 @@ enum SurfRating: Int, Comparable {
     }
 }
 
+// MARK: - Tide Event (High/Low)
+
+struct TideEvent: Identifiable {
+    let id: Int  // timestamp
+    let time: Date
+    let type: String  // "HIGH" or "LOW"
+    let height: Double
+
+    var timeDisplay: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mma"
+        return formatter.string(from: time).lowercased()
+    }
+
+    var heightDisplay: String {
+        String(format: "%.1fft", height)
+    }
+
+    var shortDisplay: String {
+        let prefix = type == "HIGH" ? "H" : "L"
+        return "\(prefix) \(timeDisplay)"
+    }
+}
+
 // MARK: - Period Forecast (AM/Noon/PM)
 
 struct PeriodForecast {
@@ -152,18 +220,39 @@ struct PeriodForecast {
     let swellHeight: Double?
     let swellPeriod: Int?
     let swellDirection: Double?  // degrees
+    let windSpeed: Double?
+    let windGust: Double?
+    let windDirection: Double?
+    let windDirectionType: String?  // "Offshore", "Onshore", etc.
 
     var waveDisplay: String {
         guard let min = waveMin, let max = waveMax else { return "—" }
         if min == max || max - min < 0.5 {
-            return "\(Int(round(min)))"
+            return "\(Int(round(min)))ft"
         }
-        return "\(Int(round(min)))-\(Int(round(max)))"
+        return "\(Int(round(min)))-\(Int(round(max)))ft"
     }
 
     var swellDisplay: String? {
         guard let height = swellHeight, let period = swellPeriod else { return nil }
         return String(format: "%.1fft %ds", height, period)
+    }
+
+    var windDisplay: String? {
+        guard let speed = windSpeed else { return nil }
+        let speedInt = Int(round(speed))
+        if let gust = windGust, abs(gust - speed) >= 1 {
+            return "\(speedInt)-\(Int(round(gust)))"
+        }
+        return "\(speedInt)"
+    }
+
+    var windArrow: String {
+        guard let dir = windDirection else { return "" }
+        // Wind direction is where wind comes FROM, arrow shows direction it blows
+        let arrows = ["↓", "↙", "←", "↖", "↑", "↗", "→", "↘"]
+        let index = Int(round(dir / 45.0)) % 8
+        return arrows[index]
     }
 
     var directionArrow: String {
@@ -182,6 +271,7 @@ struct DayForecast: Identifiable {
     let date: Date
     let waveMin: Double?
     let waveMax: Double?
+    let wavePlus: Bool
     let ratingAM: SurfRating
     let ratingNoon: SurfRating
     let ratingPM: SurfRating
@@ -202,10 +292,11 @@ struct DayForecast: Identifiable {
 
     var waveDisplay: String {
         guard let min = waveMin, let max = waveMax else { return "—" }
+        let plus = wavePlus ? "+" : ""
         if min == max || max - min < 0.5 {
-            return "\(Int(round(min)))ft"
+            return "\(Int(round(min)))ft\(plus)"
         }
-        return "\(Int(round(min)))-\(Int(round(max)))ft"
+        return "\(Int(round(min)))-\(Int(round(max)))ft\(plus)"
     }
 
     var directionArrows: String {
@@ -231,13 +322,15 @@ struct SpotForecast: Identifiable {
     let spotName: String
     let periods: [PeriodForecast]  // AM, Noon, PM for today
     let extendedForecast: [DayForecast]  // Multi-day forecast
+    let tideEvents: [TideEvent]  // High/low tides for today
     let timestamp: Date
 
-    init(id: String, spotName: String, periods: [PeriodForecast], extendedForecast: [DayForecast] = [], timestamp: Date) {
+    init(id: String, spotName: String, periods: [PeriodForecast], extendedForecast: [DayForecast] = [], tideEvents: [TideEvent] = [], timestamp: Date) {
         self.id = id
         self.spotName = spotName
         self.periods = periods
         self.extendedForecast = extendedForecast
+        self.tideEvents = tideEvents
         self.timestamp = timestamp
     }
 
