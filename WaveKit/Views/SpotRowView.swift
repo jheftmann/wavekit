@@ -49,8 +49,8 @@ struct PeriodColumnView: View {
                 .font(.system(size: 9, weight: .medium))
                 .foregroundColor(.secondary)
 
-            // Rating bars (horizontal)
-            RatingDotsView(rating: period.rating)
+            // Rating bar
+            RatingBarView(rating: period.rating)
 
             // Wave height
             Text(period.waveDisplay)
@@ -74,17 +74,13 @@ struct PeriodColumnView: View {
     }
 }
 
-struct RatingDotsView: View {
+struct RatingBarView: View {
     let rating: SurfRating
 
     var body: some View {
-        HStack(spacing: 1) {
-            ForEach(0..<6, id: \.self) { index in
-                RoundedRectangle(cornerRadius: 1)
-                    .fill(index < rating.dotCount ? rating.color : Color.secondary.opacity(0.15))
-                    .frame(width: 4, height: 8)
-            }
-        }
+        RoundedRectangle(cornerRadius: 2)
+            .fill(rating.color)
+            .frame(width: 33, height: 4)
     }
 }
 

@@ -120,8 +120,8 @@ enum SurfRating: Int, Comparable {
         case .veryPoor: return Color(red: 0.95, green: 0.3, blue: 0.5)   // Pink/Red
         case .poor: return Color(red: 1.0, green: 0.6, blue: 0.0)        // Orange
         case .poorToFair: return Color(red: 0.95, green: 0.8, blue: 0.0) // Yellow
-        case .fair: return Color(red: 0.2, green: 0.8, blue: 0.4)        // Green
-        case .fairToGood: return Color(red: 0.0, green: 0.8, blue: 0.4)  // Green
+        case .fair: return Color(red: 0.2, green: 0.85, blue: 0.25)       // Green
+        case .fairToGood: return Color(red: 0.0, green: 0.75, blue: 0.55) // Teal-green
         case .good: return Color(red: 0.0, green: 0.7, blue: 0.7)        // Cyan/Teal
         case .epic: return Color(red: 0.0, green: 0.6, blue: 0.8)        // Blue/Cyan
         case .unknown: return .secondary
