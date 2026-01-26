@@ -6,7 +6,7 @@ struct ForecastRowView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            // Spot name (HStack to match Today view alignment)
+            // Spot name
             HStack {
                 Text(forecast?.spotName ?? spot.name)
                     .font(.system(.body, weight: .medium))
@@ -15,11 +15,14 @@ struct ForecastRowView: View {
             }
             .frame(height: 18)
 
+            // Day columns with horizontal scroll
             if let forecast = forecast, !forecast.extendedForecast.isEmpty {
-                HStack(spacing: 8) {
-                    ForEach(forecast.extendedForecast.prefix(6)) { day in
-                        DayColumnView(day: day)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 4) {
+                        ForEach(forecast.extendedForecast) { day in
+                            DayColumnView(day: day)
+                                .frame(width: 52)
+                        }
                     }
                 }
             } else {

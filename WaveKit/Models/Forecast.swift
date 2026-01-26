@@ -19,6 +19,8 @@ struct WaveUnits: Codable {
 
 struct LocationInfo: Codable {
     let name: String?
+    let lat: Double?
+    let lon: Double?
 }
 
 struct WaveData: Codable {

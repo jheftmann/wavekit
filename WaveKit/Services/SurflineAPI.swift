@@ -89,6 +89,13 @@ final class SurflineAPI: ObservableObject {
             FavoritesStore.shared.updateSpotName(spotId: spot.id, name: spotName)
         }
 
+        // Update spot coordinates if available
+        if let lat = wave?.associated?.location?.lat,
+           let lon = wave?.associated?.location?.lon,
+           (spot.latitude == nil || spot.longitude == nil) {
+            FavoritesStore.shared.updateSpotCoordinates(spotId: spot.id, latitude: lat, longitude: lon)
+        }
+
         // Build period forecasts for AM (6am), Noon (12pm), PM (6pm)
         let periods = buildPeriodForecasts(wave: wave, rating: rating, wind: wind)
 

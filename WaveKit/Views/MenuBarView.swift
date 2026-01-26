@@ -9,6 +9,7 @@ struct MenuBarView: View {
     @ObservedObject var api: SurflineAPI
     @ObservedObject var favoritesStore: FavoritesStore
     @ObservedObject var authManager: AuthManager
+    @ObservedObject var locationManager: LocationManager
 
     @Environment(\.openWindow) private var openWindow
     @State private var viewMode: ViewMode = .forecast
@@ -61,12 +62,25 @@ struct MenuBarView: View {
         }
         .frame(width: 320)
         .task {
-            // Initial fetch
+            // Request location and fetch forecasts
+            locationManager.requestLocation()
             await api.fetchForecasts(for: favoritesStore.spots)
         }
         .onChange(of: favoritesStore.spots) { _, newSpots in
             Task {
                 await api.fetchForecasts(for: newSpots)
+            }
+        }
+        .onChange(of: locationManager.userLocation) { _, _ in
+            // Sort spots when location is available
+            if locationManager.userLocation != nil {
+                favoritesStore.sortByDistance(from: locationManager)
+            }
+        }
+        .onChange(of: api.lastUpdated) { _, _ in
+            // Sort after forecasts load (coordinates are now saved)
+            if locationManager.userLocation != nil {
+                favoritesStore.sortByDistance(from: locationManager)
             }
         }
     }
@@ -105,24 +119,35 @@ struct MenuBarView: View {
         .padding(.horizontal, 16)
     }
 
+    private let rowHeight: CGFloat = 85
+    private let maxVisibleRows: Int = 5
+
     private var spotListView: some View {
+        let spotCount = favoritesStore.spots.count
+        let visibleRows = min(spotCount, maxVisibleRows)
+        let listHeight = CGFloat(visibleRows) * rowHeight
+
+        return Group {
+            if viewMode == .forecast {
+                forecastListView
+            } else {
+                todayListView
+            }
+        }
+        .frame(height: listHeight)
+    }
+
+    private var forecastListView: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
                 ForEach(favoritesStore.spots) { spot in
                     Button {
                         openSpotInBrowser(spot)
                     } label: {
-                        if viewMode == .forecast {
-                            ForecastRowView(
-                                spot: spot,
-                                forecast: api.forecasts[spot.id]
-                            )
-                        } else {
-                            SpotRowView(
-                                spot: spot,
-                                forecast: api.forecasts[spot.id]
-                            )
-                        }
+                        ForecastRowView(
+                            spot: spot,
+                            forecast: api.forecasts[spot.id]
+                        )
                     }
                     .buttonStyle(.plain)
 
@@ -133,7 +158,29 @@ struct MenuBarView: View {
                 }
             }
         }
-        .frame(maxHeight: 400)
+    }
+
+    private var todayListView: some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(favoritesStore.spots) { spot in
+                    Button {
+                        openSpotInBrowser(spot)
+                    } label: {
+                        SpotRowView(
+                            spot: spot,
+                            forecast: api.forecasts[spot.id]
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    if spot.id != favoritesStore.spots.last?.id {
+                        Divider()
+                            .padding(.leading, 12)
+                    }
+                }
+            }
+        }
     }
 
     private var footerView: some View {
@@ -202,6 +249,7 @@ struct MenuBarView: View {
     MenuBarView(
         api: SurflineAPI.shared,
         favoritesStore: FavoritesStore.shared,
-        authManager: AuthManager.shared
+        authManager: AuthManager.shared,
+        locationManager: LocationManager.shared
     )
 }

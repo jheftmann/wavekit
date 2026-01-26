@@ -4,6 +4,8 @@ struct Spot: Identifiable, Codable, Equatable {
     let id: String  // spotId from Surfline
     let name: String
     let slug: String?  // URL-friendly name like "venice-breakwater"
+    var latitude: Double?
+    var longitude: Double?
 
     var surflineURL: URL {
         if let slug = slug {

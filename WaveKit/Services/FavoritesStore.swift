@@ -73,7 +73,29 @@ final class FavoritesStore: ObservableObject {
     func updateSpotName(spotId: String, name: String) {
         guard let index = spots.firstIndex(where: { $0.id == spotId }) else { return }
         let oldSpot = spots[index]
-        spots[index] = Spot(id: oldSpot.id, name: name, slug: oldSpot.slug)
+        var newSpot = Spot(id: oldSpot.id, name: name, slug: oldSpot.slug)
+        newSpot.latitude = oldSpot.latitude
+        newSpot.longitude = oldSpot.longitude
+        spots[index] = newSpot
+        saveSpots()
+    }
+
+    func updateSpotCoordinates(spotId: String, latitude: Double, longitude: Double) {
+        guard let index = spots.firstIndex(where: { $0.id == spotId }) else { return }
+        let oldSpot = spots[index]
+        var newSpot = Spot(id: oldSpot.id, name: oldSpot.name, slug: oldSpot.slug)
+        newSpot.latitude = latitude
+        newSpot.longitude = longitude
+        spots[index] = newSpot
+        saveSpots()
+    }
+
+    func sortByDistance(from locationManager: LocationManager) {
+        spots.sort { spot1, spot2 in
+            let distance1 = locationManager.distance(to: spot1) ?? .greatestFiniteMagnitude
+            let distance2 = locationManager.distance(to: spot2) ?? .greatestFiniteMagnitude
+            return distance1 < distance2
+        }
         saveSpots()
     }
 

@@ -5,13 +5,15 @@ struct WaveKitApp: App {
     @StateObject private var api = SurflineAPI.shared
     @StateObject private var favoritesStore = FavoritesStore.shared
     @StateObject private var authManager = AuthManager.shared
+    @StateObject private var locationManager = LocationManager.shared
 
     var body: some Scene {
         MenuBarExtra {
             MenuBarView(
                 api: api,
                 favoritesStore: favoritesStore,
-                authManager: authManager
+                authManager: authManager,
+                locationManager: locationManager
             )
         } label: {
             #if DEBUG
