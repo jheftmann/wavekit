@@ -194,6 +194,7 @@ struct MenuBarView: View {
                     .labelStyle(.iconOnly)
             }
             .buttonStyle(.borderless)
+            .focusEffectDisabled()
             .help("Add Spot")
 
             Spacer()
@@ -221,6 +222,7 @@ struct MenuBarView: View {
                 }
             }
             .buttonStyle(.borderless)
+            .focusEffectDisabled()
             .disabled(api.isLoading)
             .help("Refresh forecasts")
         }
