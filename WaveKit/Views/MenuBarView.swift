@@ -29,6 +29,7 @@ struct MenuBarView: View {
                             .labelStyle(.iconOnly)
                     }
                     .buttonStyle(.borderless)
+                    .focusEffectDisabled()
                     .help("Settings")
                 }
 
@@ -60,7 +61,7 @@ struct MenuBarView: View {
             // Footer
             footerView
         }
-        .frame(width: 320)
+        .frame(width: 360)
         .task {
             // Request location and fetch forecasts
             locationManager.requestLocation()

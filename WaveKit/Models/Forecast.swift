@@ -11,6 +11,7 @@ struct WaveForecastResponse: Codable {
 struct WaveAssociated: Codable {
     let units: WaveUnits?
     let location: LocationInfo?
+    let utcOffset: Int?
 }
 
 struct WaveUnits: Codable {
@@ -278,16 +279,26 @@ struct DayForecast: Identifiable {
     let ratingNoon: SurfRating
     let ratingPM: SurfRating
     let swellDirection: Double?
+    let utcOffset: Int  // Spot's timezone offset in hours
 
     var dateLabel: String {
-        let calendar = Calendar.current
-        if calendar.isDateInToday(date) {
+        // Use the spot's timezone for date comparisons
+        let spotTimeZone = TimeZone(secondsFromGMT: utcOffset * 3600) ?? .current
+        var calendar = Calendar.current
+        calendar.timeZone = spotTimeZone
+
+        let now = Date()
+        let todayInSpotTZ = calendar.startOfDay(for: now)
+        let tomorrowInSpotTZ = calendar.date(byAdding: .day, value: 1, to: todayInSpotTZ)!
+
+        if calendar.isDate(date, inSameDayAs: todayInSpotTZ) {
             return "Today"
-        } else if calendar.isDateInTomorrow(date) {
+        } else if calendar.isDate(date, inSameDayAs: tomorrowInSpotTZ) {
             return "Tomorrow"
         } else {
             let formatter = DateFormatter()
             formatter.dateFormat = "EEE M/d"
+            formatter.timeZone = spotTimeZone
             return formatter.string(from: date)
         }
     }

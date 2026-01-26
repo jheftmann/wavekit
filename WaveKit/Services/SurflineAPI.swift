@@ -96,11 +96,14 @@ final class SurflineAPI: ObservableObject {
             FavoritesStore.shared.updateSpotCoordinates(spotId: spot.id, latitude: lat, longitude: lon)
         }
 
+        // Get spot's timezone offset (default to local if not available)
+        let utcOffset = wave?.associated?.utcOffset ?? (TimeZone.current.secondsFromGMT() / 3600)
+
         // Build period forecasts for AM (6am), Noon (12pm), PM (6pm)
         let periods = buildPeriodForecasts(wave: wave, rating: rating, wind: wind)
 
         // Build extended forecast (daily)
-        let extendedForecast = buildExtendedForecast(wave: wave, rating: rating)
+        let extendedForecast = buildExtendedForecast(wave: wave, rating: rating, utcOffset: utcOffset)
 
         // Build tide events (high/low only)
         let tideEvents = buildTideEvents(tide: tide)
@@ -194,10 +197,13 @@ final class SurflineAPI: ObservableObject {
             .sorted { $0.time < $1.time }
     }
 
-    private func buildExtendedForecast(wave: WaveForecastResponse?, rating: RatingForecastResponse?) -> [DayForecast] {
-        let calendar = Calendar.current
+    private func buildExtendedForecast(wave: WaveForecastResponse?, rating: RatingForecastResponse?, utcOffset: Int) -> [DayForecast] {
+        // Use spot's timezone for grouping data by day
+        let spotTimeZone = TimeZone(secondsFromGMT: utcOffset * 3600) ?? .current
+        var calendar = Calendar.current
+        calendar.timeZone = spotTimeZone
 
-        // Group wave data by day
+        // Group wave data by day (in spot's timezone)
         var dayData: [Date: (waves: [WaveEntry], ratings: [RatingEntry])] = [:]
 
         // Process wave entries
@@ -264,7 +270,8 @@ final class SurflineAPI: ObservableObject {
                 swellDirection: closestWave?.swells?
                     .filter { ($0.height ?? 0) > 0 }
                     .max(by: { ($0.height ?? 0) < ($1.height ?? 0) })?
-                    .direction
+                    .direction,
+                utcOffset: utcOffset
             )
 
             forecasts.append(forecast)

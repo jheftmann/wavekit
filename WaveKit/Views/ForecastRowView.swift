@@ -5,7 +5,7 @@ struct ForecastRowView: View {
     let forecast: SpotForecast?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 3) {
             // Spot name
             HStack {
                 Text(forecast?.spotName ?? spot.name)
@@ -21,7 +21,7 @@ struct ForecastRowView: View {
                     HStack(spacing: 4) {
                         ForEach(forecast.extendedForecast) { day in
                             DayColumnView(day: day)
-                                .frame(width: 52)
+                                .frame(width: 52, alignment: .leading)
                         }
                     }
                 }
@@ -78,7 +78,7 @@ struct DayColumnView: View {
             Text(day.waveDisplay)
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
         }
-        .frame(height: 48)
+        .frame(height: 48, alignment: .leading)
     }
 }
 
@@ -91,12 +91,12 @@ struct DayColumnView: View {
                 spotName: "Venice Breakwater",
                 periods: [],
                 extendedForecast: [
-                    DayForecast(id: Date(), date: Date(), waveMin: 2, waveMax: 3, wavePlus: false, ratingAM: .fair, ratingNoon: .fair, ratingPM: .poorToFair, swellDirection: 190),
-                    DayForecast(id: Date().addingTimeInterval(86400), date: Date().addingTimeInterval(86400), waveMin: 2, waveMax: 3, wavePlus: false, ratingAM: .fair, ratingNoon: .fairToGood, ratingPM: .fair, swellDirection: 190),
-                    DayForecast(id: Date().addingTimeInterval(86400*2), date: Date().addingTimeInterval(86400*2), waveMin: 3, waveMax: 4, wavePlus: false, ratingAM: .good, ratingNoon: .good, ratingPM: .fairToGood, swellDirection: 200),
-                    DayForecast(id: Date().addingTimeInterval(86400*3), date: Date().addingTimeInterval(86400*3), waveMin: 3, waveMax: 5, wavePlus: true, ratingAM: .good, ratingNoon: .epic, ratingPM: .good, swellDirection: 210),
-                    DayForecast(id: Date().addingTimeInterval(86400*4), date: Date().addingTimeInterval(86400*4), waveMin: 2, waveMax: 4, wavePlus: false, ratingAM: .fairToGood, ratingNoon: .good, ratingPM: .fair, swellDirection: 195),
-                    DayForecast(id: Date().addingTimeInterval(86400*5), date: Date().addingTimeInterval(86400*5), waveMin: 2, waveMax: 3, wavePlus: false, ratingAM: .fair, ratingNoon: .fair, ratingPM: .poorToFair, swellDirection: 180),
+                    DayForecast(id: Date(), date: Date(), waveMin: 2, waveMax: 3, wavePlus: false, ratingAM: .fair, ratingNoon: .fair, ratingPM: .poorToFair, swellDirection: 190, utcOffset: -8),
+                    DayForecast(id: Date().addingTimeInterval(86400), date: Date().addingTimeInterval(86400), waveMin: 2, waveMax: 3, wavePlus: false, ratingAM: .fair, ratingNoon: .fairToGood, ratingPM: .fair, swellDirection: 190, utcOffset: -8),
+                    DayForecast(id: Date().addingTimeInterval(86400*2), date: Date().addingTimeInterval(86400*2), waveMin: 3, waveMax: 4, wavePlus: false, ratingAM: .good, ratingNoon: .good, ratingPM: .fairToGood, swellDirection: 200, utcOffset: -8),
+                    DayForecast(id: Date().addingTimeInterval(86400*3), date: Date().addingTimeInterval(86400*3), waveMin: 3, waveMax: 5, wavePlus: true, ratingAM: .good, ratingNoon: .epic, ratingPM: .good, swellDirection: 210, utcOffset: -8),
+                    DayForecast(id: Date().addingTimeInterval(86400*4), date: Date().addingTimeInterval(86400*4), waveMin: 2, waveMax: 4, wavePlus: false, ratingAM: .fairToGood, ratingNoon: .good, ratingPM: .fair, swellDirection: 195, utcOffset: -8),
+                    DayForecast(id: Date().addingTimeInterval(86400*5), date: Date().addingTimeInterval(86400*5), waveMin: 2, waveMax: 3, wavePlus: false, ratingAM: .fair, ratingNoon: .fair, ratingPM: .poorToFair, swellDirection: 180, utcOffset: -8),
                 ],
                 timestamp: Date()
             )
