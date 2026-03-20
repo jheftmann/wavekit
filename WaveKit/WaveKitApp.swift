@@ -90,7 +90,7 @@ struct KeyboardInputModifier: ViewModifier {
 
 private var menuBarIcon: some View {
     Group {
-        if let url = Bundle.module.url(forResource: "menubar-default", withExtension: "png"),
+        if let url = Bundle.module.url(forResource: "menubar-default", withExtension: "png", subdirectory: "Images"),
            let img = NSImage(contentsOf: url) {
             Image(nsImage: img)
                 .resizable()

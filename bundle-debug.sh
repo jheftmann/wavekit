@@ -23,7 +23,7 @@ cp "$BUILD_DIR/WaveKit" "$MACOS_DIR/WaveKit"
 
 # Copy resources bundle (icons, images)
 cp -r "$BUILD_DIR/WaveKit_WaveKit.bundle" "$RESOURCES_DIR/"
-cp "WaveKit/Resources/Images/AppIcon.png" "$RESOURCES_DIR/AppIcon.png"
+cp "WaveKit/Resources/Images/AppIcon.icns" "$RESOURCES_DIR/AppIcon.icns"
 
 # Create Info.plist
 cat > "$CONTENTS_DIR/Info.plist" << 'PLIST'
@@ -34,7 +34,7 @@ cat > "$CONTENTS_DIR/Info.plist" << 'PLIST'
     <key>CFBundleExecutable</key>
     <string>WaveKit</string>
     <key>CFBundleIconFile</key>
-    <string>AppIcon</string>
+    <string>AppIcon.icns</string>
     <key>CFBundleIdentifier</key>
     <string>com.wavekit.dev</string>
     <key>CFBundleName</key>
