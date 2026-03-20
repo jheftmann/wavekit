@@ -9,6 +9,11 @@ struct WaveKitApp: App {
 
     init() {
         CalendarServer.shared.start()
+        // Fetch forecasts on launch so calendar server has data immediately
+        Task {
+            await SurflineAPI.shared.fetchForecasts(for: FavoritesStore.shared.spots)
+            CalendarServer.shared.updateForecasts(SurflineAPI.shared.forecasts)
+        }
     }
 
     var body: some Scene {
