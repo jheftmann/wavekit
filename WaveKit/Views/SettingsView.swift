@@ -73,13 +73,13 @@ struct SettingsView: View {
                 } else {
                     List {
                         ForEach(favoritesStore.spots) { spot in
+                            let calEnabled = calendarManager.enabledSpotIds.contains(spot.id)
                             HStack(spacing: 8) {
                                 Image(systemName: "line.3.horizontal")
                                     .foregroundColor(.secondary)
                                     .font(.system(size: 12))
                                 Text(spot.name)
                                 Spacer()
-                                let calEnabled = calendarManager.enabledSpotIds.contains(spot.id)
                                 Button {
                                     if calEnabled {
                                         calendarManager.disableSpot(spot.id)
