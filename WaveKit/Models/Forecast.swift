@@ -175,6 +175,19 @@ enum SurfRating: Int, Comparable {
         }
     }
 
+    var displayName: String {
+        switch self {
+        case .veryPoor:   return "Very Poor"
+        case .poor:       return "Poor"
+        case .poorToFair: return "Poor to Fair"
+        case .fair:       return "Fair"
+        case .fairToGood: return "Fair to Good"
+        case .good:       return "Good"
+        case .epic:       return "Epic"
+        case .unknown:    return "—"
+        }
+    }
+
     var dotCount: Int {
         switch self {
         case .veryPoor: return 1

@@ -5,6 +5,7 @@ struct SettingsView: View {
     @Environment(\.openWindow) private var openWindow
     @ObservedObject var authManager: AuthManager
     @ObservedObject var favoritesStore: FavoritesStore
+    @ObservedObject private var calendarManager = CalendarManager.shared
 
     var body: some View {
         VStack(spacing: 0) {
@@ -78,13 +79,8 @@ struct SettingsView: View {
                                     .font(.system(size: 12))
                                 Text(spot.name)
                                 Spacer()
-                                Button {
-                                    favoritesStore.removeSpot(spot)
-                                } label: {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.red)
-                                }
-                                .buttonStyle(.borderless)
+                                calendarButton(for: spot)
+                                trashButton(for: spot)
                             }
                         }
                         .onMove { from, to in
@@ -113,6 +109,43 @@ struct SettingsView: View {
             .padding()
         }
         .frame(width: 350, height: 450)
+    }
+
+    @ViewBuilder
+    private func calendarButton(for spot: Spot) -> some View {
+        let isEnabled = calendarManager.enabledSpotIds.contains(spot.id)
+        Button {
+            if isEnabled {
+                calendarManager.disableSpot(spot.id)
+            } else {
+                Task {
+                    await calendarManager.enableSpot(
+                        spot.id,
+                        name: spot.name,
+                        forecasts: SurflineAPI.shared.forecasts
+                    )
+                }
+            }
+        } label: {
+            Image(systemName: isEnabled ? "calendar.badge.checkmark" : "calendar.badge.plus")
+                .foregroundColor(isEnabled ? .accentColor : .secondary)
+                .frame(width: 20, height: 20)
+        }
+        .buttonStyle(.borderless)
+        .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private func trashButton(for spot: Spot) -> some View {
+        Button {
+            favoritesStore.removeSpot(spot)
+        } label: {
+            Image(systemName: "trash")
+                .foregroundColor(.red)
+                .frame(width: 20, height: 20)
+        }
+        .buttonStyle(.borderless)
+        .contentShape(Rectangle())
     }
 }
 

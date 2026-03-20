@@ -21,6 +21,10 @@ mkdir -p "$RESOURCES_DIR"
 # Copy binary
 cp "$BUILD_DIR/WaveKit" "$MACOS_DIR/WaveKit"
 
+# Copy resources bundle (icons, images)
+cp -r "$BUILD_DIR/WaveKit_WaveKit.bundle" "$RESOURCES_DIR/"
+cp "WaveKit/Resources/Images/AppIcon.icns" "$RESOURCES_DIR/AppIcon.icns"
+
 # Create Info.plist
 cat > "$CONTENTS_DIR/Info.plist" << 'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -29,6 +33,8 @@ cat > "$CONTENTS_DIR/Info.plist" << 'PLIST'
 <dict>
     <key>CFBundleExecutable</key>
     <string>WaveKit</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon.icns</string>
     <key>CFBundleIdentifier</key>
     <string>com.wavekit.dev</string>
     <key>CFBundleName</key>
@@ -43,6 +49,8 @@ cat > "$CONTENTS_DIR/Info.plist" << 'PLIST'
     <string>14.0</string>
     <key>LSUIElement</key>
     <true/>
+    <key>NSCalendarsUsageDescription</key>
+    <string>WaveKit adds surf forecast events to your calendar so you can see wave conditions at a glance.</string>
     <key>NSLocationUsageDescription</key>
     <string>WaveKit uses your location to sort surf spots by distance.</string>
 </dict>

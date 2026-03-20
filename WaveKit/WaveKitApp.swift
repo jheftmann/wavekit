@@ -7,6 +7,13 @@ struct WaveKitApp: App {
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var locationManager = LocationManager.shared
 
+    init() {
+        Task {
+            await SurflineAPI.shared.fetchForecasts(for: FavoritesStore.shared.spots)
+            CalendarManager.shared.syncAll(forecasts: SurflineAPI.shared.forecasts)
+        }
+    }
+
     var body: some Scene {
         MenuBarExtra {
             MenuBarView(
@@ -15,12 +22,11 @@ struct WaveKitApp: App {
                 authManager: authManager,
                 locationManager: locationManager
             )
+            .onChange(of: api.lastUpdated) { _, _ in
+                CalendarManager.shared.syncAll(forecasts: api.forecasts)
+            }
         } label: {
-            #if DEBUG
-            Label("WaveKit", systemImage: "water.waves.slash")
-            #else
-            Label("WaveKit", systemImage: "water.waves")
-            #endif
+            menuBarIcon
         }
         .menuBarExtraStyle(.window)
 
@@ -77,6 +83,25 @@ struct KeyboardInputModifier: ViewModifier {
                     NSApp.setActivationPolicy(.accessory)
                 }
             }
+    }
+}
+
+// MARK: - Menu Bar Icon
+
+private var menuBarNSImage: NSImage? {
+    guard let url = Bundle.module.url(forResource: "menubar-default", withExtension: "png", subdirectory: "Images"),
+          let img = NSImage(contentsOf: url) else { return nil }
+    img.isTemplate = true  // macOS tints for light/dark menu bar
+    return img
+}
+
+private var menuBarIcon: some View {
+    Group {
+        if let img = menuBarNSImage {
+            Image(nsImage: img)
+        } else {
+            Image(systemName: "water.waves")
+        }
     }
 }
 
