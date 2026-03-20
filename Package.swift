@@ -10,7 +10,10 @@ let package = Package(
         .executableTarget(
             name: "WaveKit",
             path: "WaveKit",
-            exclude: ["Resources/Assets.xcassets", "WaveKit.entitlements"],
+            exclude: ["WaveKit.entitlements", "Resources/Assets.xcassets"],
+            resources: [
+                .copy("Resources/Images")
+            ],
             swiftSettings: [
                 .unsafeFlags(["-parse-as-library"])
             ]

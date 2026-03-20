@@ -26,11 +26,7 @@ struct WaveKitApp: App {
                 CalendarManager.shared.syncAll(forecasts: api.forecasts)
             }
         } label: {
-            #if DEBUG
-            Label("WaveKit", systemImage: "water.waves.slash")
-            #else
-            Label("WaveKit", systemImage: "water.waves")
-            #endif
+            menuBarIcon
         }
         .menuBarExtraStyle(.window)
 
@@ -87,6 +83,22 @@ struct KeyboardInputModifier: ViewModifier {
                     NSApp.setActivationPolicy(.accessory)
                 }
             }
+    }
+}
+
+// MARK: - Menu Bar Icon
+
+private var menuBarIcon: some View {
+    Group {
+        if let url = Bundle.module.url(forResource: "menubar-default", withExtension: "png"),
+           let img = NSImage(contentsOf: url) {
+            Image(nsImage: img)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 18, height: 12)
+        } else {
+            Image(systemName: "water.waves")
+        }
     }
 }
 
