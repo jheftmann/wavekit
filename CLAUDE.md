@@ -104,6 +104,7 @@ When shipping a new version:
 3. Update `README.md` changelog section with new features
 4. Update `docs/index.html`:
    - Increment version label (`<span class="version">vX.Y.Z</span>`)
+   - Replace `docs/screenshot.png` with a fresh screenshot of the latest app
    - Update features list / description to reflect new functionality
    - Add any new sections for major features
 5. Commit, push, merge PR
