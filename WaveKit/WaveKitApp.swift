@@ -38,8 +38,7 @@ struct WaveKitApp: App {
         Window("Settings", id: "settings") {
             SettingsView(
                 authManager: authManager,
-                favoritesStore: favoritesStore,
-                calendarManager: CalendarManager.shared
+                favoritesStore: favoritesStore
             )
             .enableKeyboardInput()
         }

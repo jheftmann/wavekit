@@ -5,7 +5,7 @@ struct SettingsView: View {
     @Environment(\.openWindow) private var openWindow
     @ObservedObject var authManager: AuthManager
     @ObservedObject var favoritesStore: FavoritesStore
-    @ObservedObject var calendarManager: CalendarManager
+    @StateObject private var calendarManager = CalendarManager.shared
 
     var body: some View {
         VStack(spacing: 0) {
@@ -139,7 +139,6 @@ struct SettingsView: View {
 #Preview {
     SettingsView(
         authManager: AuthManager.shared,
-        favoritesStore: FavoritesStore.shared,
-        calendarManager: CalendarManager.shared
+        favoritesStore: FavoritesStore.shared
     )
 }
