@@ -7,6 +7,10 @@ struct WaveKitApp: App {
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var locationManager = LocationManager.shared
 
+    init() {
+        CalendarServer.shared.start()
+    }
+
     var body: some Scene {
         MenuBarExtra {
             MenuBarView(
@@ -15,6 +19,9 @@ struct WaveKitApp: App {
                 authManager: authManager,
                 locationManager: locationManager
             )
+            .onChange(of: api.lastUpdated) { _, _ in
+                CalendarServer.shared.updateForecasts(api.forecasts)
+            }
         } label: {
             #if DEBUG
             Label("WaveKit", systemImage: "water.waves.slash")

@@ -6,6 +6,8 @@ struct SettingsView: View {
     @ObservedObject var authManager: AuthManager
     @ObservedObject var favoritesStore: FavoritesStore
 
+    @State private var copiedSpotId: String?
+
     var body: some View {
         VStack(spacing: 0) {
             // Account Section
@@ -78,6 +80,20 @@ struct SettingsView: View {
                                     .font(.system(size: 12))
                                 Text(spot.name)
                                 Spacer()
+                                Button {
+                                    let url = ICSGenerator.calendarURL(for: spot.id)
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString(url, forType: .string)
+                                    copiedSpotId = spot.id
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                        if copiedSpotId == spot.id { copiedSpotId = nil }
+                                    }
+                                } label: {
+                                    Image(systemName: copiedSpotId == spot.id ? "checkmark" : "calendar.badge.plus")
+                                        .foregroundColor(copiedSpotId == spot.id ? .green : .secondary)
+                                }
+                                .buttonStyle(.borderless)
+                                .help("Copy calendar subscription URL")
                                 Button {
                                     favoritesStore.removeSpot(spot)
                                 } label: {
