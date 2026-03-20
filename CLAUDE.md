@@ -51,6 +51,7 @@ GitHub: https://github.com/jheftmann/wavekit
 - Keep `CLAUDE.md` updated at the end of every session (decisions, roadmap, pending items).
 - Keep `README.md` accurate: features list, installation steps, usage.
 - **Before building a new feature:** open a GitHub issue first. Work on a feature branch named after the issue (e.g., `feature/42-notifications`).
+- **If the next task is a significantly different feature from the current branch:** ask before starting — "This is unrelated to the current branch. Should I create a new branch first?" Do not silently pile unrelated features onto an existing branch.
 - **After deploying a feature:** update the issue to "needs verification" or open a new verification issue, then close it once confirmed working.
 - If old open PRs are piling up, flag them and ask to merge or close before starting new work.
 - Clean up merged branches after PRs are merged.
