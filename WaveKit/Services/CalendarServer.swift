@@ -46,27 +46,40 @@ final class CalendarServer {
 
     // MARK: - Connection Handling
 
+    private func log(_ msg: String) {
+        let line = "\(Date()): \(msg)\n"
+        let path = "/tmp/wavekit-calendar.log"
+        if let handle = FileHandle(forWritingAtPath: path) {
+            handle.seekToEndOfFile()
+            handle.write(line.data(using: .utf8)!)
+            handle.closeFile()
+        } else {
+            try? line.write(toFile: path, atomically: false, encoding: .utf8)
+        }
+    }
+
     private func handle(_ connection: NWConnection) {
-        NSLog("CalendarServer: new connection from \(connection.endpoint)")
+        log("new connection from \(connection.endpoint)")
         connection.start(queue: queue)
         connection.receive(minimumIncompleteLength: 1, maximumLength: 65_536) { [weak self] data, _, isComplete, error in
-            if let error { NSLog("CalendarServer: receive error: \(error)") }
+            if let error { self?.log("receive error: \(error)") }
             guard let self, let data, !data.isEmpty else {
-                NSLog("CalendarServer: empty/nil data, isComplete=\(isComplete), cancelling")
+                self?.log("empty/nil data isComplete=\(isComplete)")
                 connection.cancel()
                 return
             }
 
-            let rawHead = data.prefix(200)
-            NSLog("CalendarServer: received \(data.count) bytes, head: \(String(bytes: rawHead, encoding: .utf8) ?? rawHead.map { String(format: "%02x", $0) }.joined())")
+            let rawHead = data.prefix(300)
+            let headStr = String(bytes: rawHead, encoding: .utf8) ?? rawHead.map { String(format: "%02x", $0) }.joined()
+            self.log("received \(data.count) bytes:\n\(headStr)")
 
             let request = String(data: data, encoding: .utf8) ?? ""
             let path = self.parsePath(from: request)
-            NSLog("CalendarServer: path=\(path)")
+            self.log("path=\(path)")
             let responseData = self.responseData(for: path)
 
             connection.send(content: responseData, completion: .contentProcessed { err in
-                if let err { NSLog("CalendarServer: send error: \(err)") }
+                if let err { self.log("send error: \(err)") }
                 connection.cancel()
             })
         }
