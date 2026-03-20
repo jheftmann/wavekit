@@ -97,7 +97,6 @@ struct SettingsView: View {
                                         .foregroundColor(calEnabled ? .blue : .secondary)
                                 }
                                 .buttonStyle(.borderless)
-                                .help(calEnabled ? "Remove from Calendar" : "Add to Calendar")
                                 Button {
                                     favoritesStore.removeSpot(spot)
                                 } label: {
