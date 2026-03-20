@@ -99,10 +99,13 @@ open .build/debug/WaveKit-Dev.app
 Version is stored in `VERSION` (currently `1.0.0`). Always bump it before a release, then update the version string in `docs/index.html` (`<span class="version">vX.Y.Z</span>`) and the `href` on the download button if using a versioned filename.
 
 When shipping a new version:
-1. Bump `VERSION`
-2. Build release + package ZIP (steps above)
-3. Update changelog in `README.md`
-4. Update `docs/index.html` version label
+1. Bump `VERSION` file
+2. Build release + package ZIP (steps above — hook does this automatically on commit)
+3. Update `README.md` changelog section with new features
+4. Update `docs/index.html`:
+   - Increment version label (`<span class="version">vX.Y.Z</span>`)
+   - Update features list / description to reflect new functionality
+   - Add any new sections for major features
 5. Commit, push, merge PR
 
 ---
