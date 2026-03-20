@@ -120,29 +120,16 @@ struct MenuBarView: View {
     }
 
     private var sortToggle: some View {
-        HStack(spacing: 0) {
-            sortButton(icon: "location.fill", mode: .distance)
-            sortButton(icon: "list.bullet", mode: .manual)
+        Picker("Sort", selection: Binding(
+            get: { favoritesStore.sortMode },
+            set: { favoritesStore.setSortMode($0) }
+        )) {
+            Image(systemName: "location.fill").tag(SortMode.distance)
+            Image(systemName: "list.bullet").tag(SortMode.manual)
         }
-        .background(Color(NSColor.controlBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: 6))
-        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.secondary.opacity(0.3), lineWidth: 0.5))
-    }
-
-    private func sortButton(icon: String, mode: SortMode) -> some View {
-        let isActive = favoritesStore.sortMode == mode
-        return Button {
-            favoritesStore.setSortMode(mode)
-        } label: {
-            Image(systemName: icon)
-                .font(.system(size: 11))
-                .frame(width: 26, height: 26)
-                .background(isActive ? Color.accentColor : Color.clear)
-                .foregroundColor(isActive ? .white : .secondary)
-        }
-        .buttonStyle(.borderless)
-        .focusEffectDisabled()
-        .help(mode == .distance ? "Sort by distance" : "Manual order")
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .frame(width: 56)
     }
 
     private let rowHeight: CGFloat = 85
