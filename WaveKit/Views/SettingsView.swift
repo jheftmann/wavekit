@@ -72,7 +72,10 @@ struct SettingsView: View {
                 } else {
                     List {
                         ForEach(favoritesStore.spots) { spot in
-                            HStack {
+                            HStack(spacing: 8) {
+                                Image(systemName: "line.3.horizontal")
+                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 12))
                                 Text(spot.name)
                                 Spacer()
                                 Button {
