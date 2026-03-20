@@ -31,15 +31,16 @@
       line-height: 1.3;
     }
 
-    /* ── Layout ──────────────────────────────────────────── */
+    /* ── Outer page shell ────────────────────────────────── */
     .page {
-      max-width: 660px;
+      max-width: 1440px;
       margin: 0 auto;
       padding: 64px 48px 96px;
     }
 
-    @media (max-width: 680px) {
-      .page { padding: 48px 24px 72px; }
+    /* ── Single-column content width ─────────────────────── */
+    .col {
+      max-width: 660px;
     }
 
     /* ── Typography ──────────────────────────────────────── */
@@ -98,22 +99,11 @@
       margin-bottom: 8px;
       line-height: 1.3;
     }
-    small {
-      font-size: 12px;
-      color: var(--dark);
-    }
+    small { font-size: 12px; color: var(--dark); }
 
     /* ── Dividers ────────────────────────────────────────── */
-    .divider {
-      border: none;
-      border-top: 1px solid var(--light);
-      margin: 24px 0;
-    }
-    .divider-sub {
-      border: none;
-      border-top: 1px solid var(--muted);
-      margin: 24px 0;
-    }
+    .divider     { border: none; border-top: 1px solid var(--light); margin: 24px 0; }
+    .divider-sub { border: none; border-top: 1px solid var(--muted); margin: 24px 0; }
 
     /* ── Buttons ─────────────────────────────────────────── */
     .btn {
@@ -129,18 +119,9 @@
       white-space: nowrap;
     }
     .btn:hover { opacity: 0.88; color: var(--white); }
-    .btn-download {
-      font-size: 14px;
-      padding: 13px 26px;
-      margin-bottom: 10px;
-    }
+    .btn-download { font-size: 14px; padding: 13px 26px; margin-bottom: 10px; }
     .btn-alt { background: var(--blue-2); }
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 
     /* ── Callout ─────────────────────────────────────────── */
     .callout {
@@ -151,40 +132,80 @@
       color: var(--dark);
       margin: 12px 0;
     }
-    .callout code {
-      font-family: ui-monospace, monospace;
-      font-size: 14px;
-    }
 
-    /* ── Screenshot ──────────────────────────────────────── */
-    .screenshot-wrap {
+    /* ── Screenshot panel ────────────────────────────────── */
+    .screenshot-panel {
       background: var(--black);
       border-radius: 24px;
-      padding: 20px;
-      margin: 32px 0 40px;
+      padding: 36px 37px;
     }
-    .screenshot-wrap img {
+    .screenshot-panel img {
       border-radius: 12px;
       width: 100%;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
     }
 
-    /* ── Sections ────────────────────────────────────────── */
-    .section { margin-bottom: 0; }
-    .section + .section { margin-top: 0; }
+    /* ─────────────────────────────────────────────────────
+       NARROW layout (default — single column)
+       Screenshot sits inline between description & install
+    ───────────────────────────────────────────────────── */
+    .app-layout {
+      display: block;
+    }
+    /* inline screenshot: shown on narrow, hidden on wide */
+    .screenshot-inline {
+      margin: 24px 0;
+    }
+    /* sidebar screenshot: hidden on narrow */
+    .screenshot-sidebar {
+      display: none;
+    }
+
+    /* ─────────────────────────────────────────────────────
+       WIDE layout (≥ 1100px) — two columns
+       Content left (660px), screenshot sticky right
+    ───────────────────────────────────────────────────── */
+    @media (min-width: 1100px) {
+      .app-layout {
+        display: flex;
+        gap: 138px;
+        align-items: flex-start;
+      }
+      .app-main {
+        flex: 0 0 660px;
+      }
+      /* inline screenshot hidden on wide */
+      .screenshot-inline {
+        display: none;
+      }
+      /* sidebar screenshot shown & sticky on wide */
+      .screenshot-sidebar {
+        display: block;
+        flex: 0 1 546px;
+        position: sticky;
+        top: 48px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .page { padding: 48px 24px 72px; }
+      h1 { font-size: 36px; }
+      h2 { font-size: 26px; }
+    }
   </style>
 </head>
 <body>
 <div class="page">
 
   <!-- ── Header ─────────────────────────────────────────── -->
-  <h1>WaveKit</h1>
-  <p class="tagline">Digital tools for surfers</p>
-
-  <hr class="divider">
+  <div class="col">
+    <h1>WaveKit</h1>
+    <p class="tagline">Digital tools for surfers</p>
+    <hr class="divider">
+  </div>
 
   <!-- ── WSL Calendar ───────────────────────────────────── -->
-  <section class="section">
+  <div class="col">
     <h2>2026 WSL Championship Tour Calendar Subscription</h2>
     <p>Subscribe to get all 12 Championship Tour events in your calendar — Apple Calendar, Google Calendar, Outlook, and any app that supports .ics calendar subscriptions.</p>
     <div class="btn-row">
@@ -193,83 +214,96 @@
       <a href="wsl-2026-ct.ics" class="btn btn-alt" download>Download .ics</a>
     </div>
     <a href="https://www.worldsurfleague.com/events/2026/ct?all=1" target="_blank" rel="noopener">View the schedule on the WSL website →</a>
-  </section>
+    <hr class="divider">
+  </div>
 
-  <hr class="divider">
+  <!-- ── App section — two-column on wide ──────────────── -->
+  <div class="app-layout">
 
-  <!-- ── App ────────────────────────────────────────────── -->
-  <section class="section">
-    <h2>Surf Forecast Menubar App (MacOS)</h2>
-    <p>WaveKit gives you quick access to surf conditions for your favorite spots. It shows wave heights, surf ratings, wind, and tides — all from your menu bar.</p>
-    <ul>
-      <li>Extended forecast with daily ratings</li>
-      <li>Today's conditions with swell, wind, and tide data</li>
-      <li>Sorts spots by distance from your location</li>
-      <li>Add the forecast to your calendar app</li>
-      <li>Click any spot to open it on Surfline</li>
-    </ul>
+    <!-- Left / single column content -->
+    <div class="app-main col">
+      <h2>Surf Forecast Menubar App (MacOS)</h2>
+      <p>WaveKit gives you quick access to surf conditions for your favorite spots. It shows wave heights, surf ratings, wind, and tides — all from your menu bar.</p>
+      <ul>
+        <li>Extended forecast with daily ratings</li>
+        <li>Today's conditions with swell, wind, and tide data</li>
+        <li>Sorts spots by distance from your location</li>
+        <li>Add the forecast to your calendar app</li>
+        <li>Click any spot to open it on Surfline</li>
+      </ul>
 
-    <div class="screenshot-wrap">
-      <img src="screenshot.png" alt="WaveKit app screenshot">
+      <!-- Screenshot inline (narrow only) -->
+      <div class="screenshot-inline">
+        <div class="screenshot-panel">
+          <img src="screenshot.png" alt="WaveKit app screenshot">
+        </div>
+      </div>
+
+      <hr class="divider-sub">
+
+      <!-- Installation -->
+      <h3>Installation</h3>
+      <a href="WaveKit.zip" class="btn btn-download">Download WaveKit (v1.0.0)</a>
+      <p><small>Requires macOS 14.0 (Sonoma) or later</small></p>
+      <ol>
+        <li>Download and unzip WaveKit.zip</li>
+        <li>Drag WaveKit.app to your Applications folder</li>
+        <li>Open WaveKit from Applications</li>
+        <li>If you see a security warning, right-click the app and select <a href="#">Open</a></li>
+      </ol>
+
+      <hr class="divider-sub">
+
+      <!-- Features -->
+      <h3>Features</h3>
+
+      <h4>Adding spots</h4>
+      <p>Click the <strong>+</strong> button, then paste a Surfline URL.</p>
+      <div class="callout">Surfline URLs look like <strong>surfline.com/surf-report/...</strong></div>
+
+      <hr class="divider-sub">
+
+      <h4>View spots by distance or manually</h4>
+      <p>Use the toggle to choose whether you want to view your saved spots in order of distance (closest first) or manually. You can set the order by going to <strong>Settings (⛭)</strong> and dragging the spots in your preferred order.</p>
+
+      <hr class="divider-sub">
+
+      <h4>Forecast / Today views</h4>
+      <p>Use the toggle to switch between Forecast and Today views.</p>
+      <ul>
+        <li>Forecast view shows a 16-day outlook. Scroll horizontally to see more days.</li>
+        <li>Today view shows detailed conditions for today including swell, wind, and tides.</li>
+      </ul>
+      <div class="callout">Sign in with your Surfline account in Settings (⛭) to unlock the full 16-day forecast.</div>
+
+      <hr class="divider-sub">
+
+      <h4>Subscribe to conditions in your calendar app <em style="font-weight:400;font-size:14px;">(experimental)</em></h4>
+      <ol>
+        <li>In <strong>Settings (⛭)</strong>, click the calendar icon next to the spot you want to add to your calendar.</li>
+        <li>macOS will ask your permission to access Calendar.app</li>
+        <li>A new calendar will appear with the conditions for that spot.</li>
+      </ol>
+      <p>If you have iCloud syncing set up between your Mac and your iOS devices the calendar(s) will also appear on your other devices.</p>
+      <div class="callout">For now this feature is only supported on native calendar apps like Apple Calendar (macOS/iOS) and Notion Calendar. Google Calendar support is on the roadmap.</div>
+    </div><!-- /.app-main -->
+
+    <!-- Right column: screenshot sticky (wide only) -->
+    <div class="screenshot-sidebar">
+      <div class="screenshot-panel">
+        <img src="screenshot.png" alt="WaveKit app screenshot">
+      </div>
     </div>
 
-    <hr class="divider-sub">
-
-    <!-- Installation -->
-    <h3>Installation</h3>
-    <a href="WaveKit.zip" class="btn btn-download">Download WaveKit (v1.0.0)</a>
-    <p><small>Requires macOS 14.0 (Sonoma) or later</small></p>
-    <ol>
-      <li>Download and unzip WaveKit.zip</li>
-      <li>Drag WaveKit.app to your Applications folder</li>
-      <li>Open WaveKit from Applications</li>
-      <li>If you see a security warning, right-click the app and select <a href="#">Open</a></li>
-    </ol>
-
-    <hr class="divider-sub">
-
-    <!-- Features -->
-    <h3>Features</h3>
-
-    <h4>Adding spots</h4>
-    <p>Click the <strong>+</strong> button, then paste a Surfline URL.</p>
-    <div class="callout">Surfline URLs look like <strong>surfline.com/surf-report/...</strong></div>
-
-    <hr class="divider-sub">
-
-    <h4>View spots by distance or manually</h4>
-    <p>Use the toggle to choose whether you want to view your saved spots in order of distance (closest first) or manually. You can set the order by going to <strong>Settings (⛭)</strong> and dragging the spots in your preferred order.</p>
-
-    <hr class="divider-sub">
-
-    <h4>Forecast / Today views</h4>
-    <p>Use the toggle to switch between Forecast and Today views.</p>
-    <ul>
-      <li>Forecast view shows a 16-day outlook. Scroll horizontally to see more days.</li>
-      <li>Today view shows detailed conditions for today including swell, wind, and tides.</li>
-    </ul>
-    <div class="callout">Sign in with your Surfline account in Settings (⛭) to unlock the full 16-day forecast.</div>
-
-    <hr class="divider-sub">
-
-    <h4>Subscribe to conditions in your calendar app <em style="font-weight:400;font-size:14px;">(experimental)</em></h4>
-    <ol>
-      <li>In <strong>Settings (⛭)</strong>, click the calendar icon next to the spot you want to add to your calendar.</li>
-      <li>macOS will ask your permission to access Calendar.app</li>
-      <li>A new calendar will appear with the conditions for that spot.</li>
-    </ol>
-    <p>If you have iCloud syncing set up between your Mac and your iOS devices the calendar(s) will also appear on your other devices.</p>
-    <div class="callout">For now this feature is only supported on native calendar apps like Apple Calendar (macOS/iOS) and Notion Calendar. Google Calendar support is on the roadmap.</div>
-  </section>
-
-  <hr class="divider">
+  </div><!-- /.app-layout -->
 
   <!-- ── Info ───────────────────────────────────────────── -->
-  <section class="section">
+  <div class="col">
+    <hr class="divider">
     <h4>Information</h4>
     <p>These are experimental tools developed by <a href="https://www.jacobheftmann.com" target="_blank" rel="noopener"><strong>Jacob Heftmann</strong></a>. They're not officially endorsed or supported by Surfline, the WSL, or any other entity. Use them and be nice. For feature requests, bugs, etc., go to <a href="https://github.com/jheftmann/wavekit/issues" target="_blank" rel="noopener"><strong>GitHub Issues</strong></a>.</p>
     <p>Be respectful, share waves, and protect the ocean.</p>
-  </section>
+  </div>
 
 </div>
 </body>
