@@ -5,7 +5,7 @@ struct SettingsView: View {
     @Environment(\.openWindow) private var openWindow
     @ObservedObject var authManager: AuthManager
     @ObservedObject var favoritesStore: FavoritesStore
-    @StateObject private var calendarManager = CalendarManager.shared
+    @State private var calEnabledIds: Set<String> = []
 
     var body: some View {
         VStack(spacing: 0) {
@@ -73,7 +73,6 @@ struct SettingsView: View {
                 } else {
                     List {
                         ForEach(favoritesStore.spots) { spot in
-                            let calEnabled = calendarManager.enabledSpotIds.contains(spot.id)
                             HStack(spacing: 8) {
                                 Image(systemName: "line.3.horizontal")
                                     .foregroundColor(.secondary)
@@ -81,11 +80,13 @@ struct SettingsView: View {
                                 Text(spot.name)
                                 Spacer()
                                 Button {
-                                    if calEnabled {
-                                        calendarManager.disableSpot(spot.id)
+                                    if calEnabledIds.contains(spot.id) {
+                                        CalendarManager.shared.disableSpot(spot.id)
+                                        calEnabledIds.remove(spot.id)
                                     } else {
+                                        calEnabledIds.insert(spot.id)
                                         Task {
-                                            await calendarManager.enableSpot(
+                                            await CalendarManager.shared.enableSpot(
                                                 spot.id,
                                                 name: spot.name,
                                                 forecasts: SurflineAPI.shared.forecasts
@@ -93,8 +94,8 @@ struct SettingsView: View {
                                         }
                                     }
                                 } label: {
-                                    Image(systemName: calEnabled ? "calendar.badge.checkmark" : "calendar.badge.plus")
-                                        .foregroundColor(calEnabled ? .blue : .secondary)
+                                    Image(systemName: calEnabledIds.contains(spot.id) ? "calendar.badge.checkmark" : "calendar.badge.plus")
+                                        .foregroundColor(calEnabledIds.contains(spot.id) ? .blue : .secondary)
                                 }
                                 .buttonStyle(.borderless)
                                 Button {
@@ -132,6 +133,9 @@ struct SettingsView: View {
             .padding()
         }
         .frame(width: 350, height: 450)
+        .onAppear {
+            calEnabledIds = CalendarManager.shared.enabledSpotIds
+        }
     }
 }
 
