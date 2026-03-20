@@ -8,11 +8,9 @@ struct WaveKitApp: App {
     @StateObject private var locationManager = LocationManager.shared
 
     init() {
-        CalendarServer.shared.start()
-        // Fetch forecasts on launch so calendar server has data immediately
         Task {
             await SurflineAPI.shared.fetchForecasts(for: FavoritesStore.shared.spots)
-            CalendarServer.shared.updateForecasts(SurflineAPI.shared.forecasts)
+            CalendarManager.shared.syncAll(forecasts: SurflineAPI.shared.forecasts)
         }
     }
 
@@ -25,7 +23,7 @@ struct WaveKitApp: App {
                 locationManager: locationManager
             )
             .onChange(of: api.lastUpdated) { _, _ in
-                CalendarServer.shared.updateForecasts(api.forecasts)
+                CalendarManager.shared.syncAll(forecasts: api.forecasts)
             }
         } label: {
             #if DEBUG
@@ -40,7 +38,8 @@ struct WaveKitApp: App {
         Window("Settings", id: "settings") {
             SettingsView(
                 authManager: authManager,
-                favoritesStore: favoritesStore
+                favoritesStore: favoritesStore,
+                calendarManager: CalendarManager.shared
             )
             .enableKeyboardInput()
         }

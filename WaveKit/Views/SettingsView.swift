@@ -5,8 +5,7 @@ struct SettingsView: View {
     @Environment(\.openWindow) private var openWindow
     @ObservedObject var authManager: AuthManager
     @ObservedObject var favoritesStore: FavoritesStore
-
-    @State private var copiedSpotId: String?
+    @ObservedObject var calendarManager: CalendarManager
 
     var body: some View {
         VStack(spacing: 0) {
@@ -80,20 +79,25 @@ struct SettingsView: View {
                                     .font(.system(size: 12))
                                 Text(spot.name)
                                 Spacer()
+                                let calEnabled = calendarManager.enabledSpotIds.contains(spot.id)
                                 Button {
-                                    let url = ICSGenerator.calendarURL(for: spot.id)
-                                    NSPasteboard.general.clearContents()
-                                    NSPasteboard.general.setString(url, forType: .string)
-                                    copiedSpotId = spot.id
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                        if copiedSpotId == spot.id { copiedSpotId = nil }
+                                    if calEnabled {
+                                        calendarManager.disableSpot(spot.id)
+                                    } else {
+                                        Task {
+                                            await calendarManager.enableSpot(
+                                                spot.id,
+                                                name: spot.name,
+                                                forecasts: SurflineAPI.shared.forecasts
+                                            )
+                                        }
                                     }
                                 } label: {
-                                    Image(systemName: copiedSpotId == spot.id ? "checkmark" : "calendar.badge.plus")
-                                        .foregroundColor(copiedSpotId == spot.id ? .green : .secondary)
+                                    Image(systemName: calEnabled ? "calendar.badge.checkmark" : "calendar.badge.plus")
+                                        .foregroundColor(calEnabled ? .blue : .secondary)
                                 }
                                 .buttonStyle(.borderless)
-                                .help("Copy calendar subscription URL")
+                                .help(calEnabled ? "Remove from Calendar" : "Add to Calendar")
                                 Button {
                                     favoritesStore.removeSpot(spot)
                                 } label: {
@@ -135,6 +139,7 @@ struct SettingsView: View {
 #Preview {
     SettingsView(
         authManager: AuthManager.shared,
-        favoritesStore: FavoritesStore.shared
+        favoritesStore: FavoritesStore.shared,
+        calendarManager: CalendarManager.shared
     )
 }
