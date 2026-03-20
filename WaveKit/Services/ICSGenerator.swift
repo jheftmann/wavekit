@@ -55,7 +55,25 @@ struct ICSGenerator {
         }
 
         lines.append("END:VCALENDAR")
-        return lines.joined(separator: "\r\n")
+        return lines.map { fold($0) }.joined(separator: "\r\n")
+    }
+
+    // RFC 5545 §3.1: fold lines exceeding 75 octets
+    private static func fold(_ line: String) -> String {
+        guard line.utf8.count > 75 else { return line }
+        var result = ""
+        var lineBytes = 0
+        for scalar in line.unicodeScalars {
+            let s = String(scalar)
+            let n = s.utf8.count
+            if lineBytes + n > 75 {
+                result += "\r\n "
+                lineBytes = 1  // leading space
+            }
+            result += s
+            lineBytes += n
+        }
+        return result
     }
 
     // Floating local time (no timezone suffix) — shows the spot's local hour in any calendar
@@ -106,6 +124,6 @@ struct ICSGenerator {
             "CALSCALE:GREGORIAN",
             "METHOD:PUBLISH",
             "END:VCALENDAR"
-        ].joined(separator: "\r\n")
+        ].map { fold($0) }.joined(separator: "\r\n")
     }
 }
