@@ -1,0 +1,122 @@
+# WaveKit — Claude Working Notes
+
+## Project Overview
+
+WaveKit is a macOS menu bar app (Swift/SwiftUI, macOS 14+) that shows surf forecasts from the Surfline API for saved favorite spots. Current version: **1.0.0**.
+
+GitHub: https://github.com/jheftmann/wavekit
+
+---
+
+## Past Decisions
+
+- Renamed from SurflineFavorites → WaveKit (2025-01-22)
+- `docs/` is the GitHub Pages root (not `website/` — that folder only holds ZIPs)
+- WSL 2026 CT calendar subscription added to `docs/` as a standalone sub-project; hosted at `jheftmann.github.io/wavekit/wsl-2026-ct.ics`
+- Calendar section added to top of `docs/index.html` above the WaveKit app section
+- Surfline API used without an official key (reverse-engineered endpoints from surfline.com)
+- Location permission uses a debug `.app` bundle (`bundle-debug.sh`) because `swift run` doesn't support entitlements
+- Forecast view uses horizontal scroll to show 16 days; window was widened to fit 6 days visible at once
+- Focus effects disabled on all buttons for a cleaner macOS menu bar aesthetic
+- Version tracked in a `VERSION` file (used by the website build and ZIP packaging)
+
+---
+
+## Pending Decisions
+
+- Distribution strategy: direct download (current) vs. Mac App Store
+- Whether to require a Surfline account login or keep the free-tier flow as the primary path
+- Notification/alert system design (e.g., notify when a spot hits a target rating)
+
+---
+
+## Roadmap (Deferred Features)
+
+- Push notifications / alerts when a spot reaches a desired rating threshold
+- Widget or Today extension
+- iCloud sync for saved spots across devices
+- Multiple location profiles (e.g., "Home", "On a trip")
+- Offline/cached forecast for last-known conditions
+- App icon and proper macOS app bundle for release distribution
+- Mac App Store submission
+- Auto-update mechanism (Sparkle or similar)
+
+---
+
+## Workflow
+
+### General Rules
+
+- Keep `CHANGELOG` section in `README.md` current — add entries under a new date heading with each meaningful change.
+- Keep `CLAUDE.md` updated at the end of every session (decisions, roadmap, pending items).
+- Keep `README.md` accurate: features list, installation steps, usage.
+- **Before building a new feature:** open a GitHub issue first. Work on a feature branch named after the issue (e.g., `feature/42-notifications`).
+- **After deploying a feature:** update the issue to "needs verification" or open a new verification issue, then close it once confirmed working.
+- If old open PRs are piling up, flag them and ask to merge or close before starting new work.
+- Clean up merged branches after PRs are merged.
+- "Push", "deploy", or "ship" means: bump `VERSION` if needed, build release, update changelog, commit, push, merge PR.
+
+### Starting a New Session
+
+1. Open the project repo: https://github.com/jheftmann/wavekit
+2. Open project directory in Finder: `open /Users/studio/Dev/WaveKit`
+3. Open project directory in Terminal: `cd /Users/studio/Dev/WaveKit`
+4. Open in VSCode: `code /Users/studio/Dev/WaveKit`
+5. Build debug app for local testing: `./bundle-debug.sh && open .build/debug/WaveKit-Dev.app`
+6. No local server needed — this is a native macOS app, not a web app.
+   - For the **website**: `cd website && open index.html` (static HTML, no server required)
+
+### Ending a Session
+
+1. Update `CLAUDE.md`: log any new decisions, pending items, or roadmap changes.
+2. Update `README.md` changelog section with what changed.
+3. Commit any loose changes with a descriptive message.
+4. Confirm all open issues reflect current state.
+
+---
+
+## Build & Release
+
+```bash
+# 1. Bump VERSION file (e.g. echo "1.1.0" > VERSION)
+
+# 2. Release build
+swift build -c release
+
+# 3. Package app bundle into versioned ZIP for website download
+VERSION=$(cat VERSION)
+cd .build/release
+zip -r "../../docs/WaveKit-${VERSION}.zip" WaveKit.app
+cd ../..
+# Also update the unversioned alias used by the download button:
+cp "docs/WaveKit-${VERSION}.zip" docs/WaveKit.zip
+
+# 4. Debug app bundle (needed for location permissions during development)
+./bundle-debug.sh
+open .build/debug/WaveKit-Dev.app
+```
+
+Version is stored in `VERSION` (currently `1.0.0`). Always bump it before a release, then update the version string in `docs/index.html` (`<span class="version">vX.Y.Z</span>`) and the `href` on the download button if using a versioned filename.
+
+When shipping a new version:
+1. Bump `VERSION`
+2. Build release + package ZIP (steps above)
+3. Update changelog in `README.md`
+4. Update `docs/index.html` version label
+5. Commit, push, merge PR
+
+---
+
+## Key Files
+
+| Path | Purpose |
+|------|---------|
+| `WaveKit/WaveKitApp.swift` | App entry point, menu bar setup |
+| `WaveKit/Views/` | All SwiftUI views |
+| `WaveKit/Services/` | Surfline API calls, location |
+| `WaveKit/Models/` | Data models |
+| `WaveKit/Resources/` | Assets |
+| `VERSION` | Single source of version truth |
+| `bundle-debug.sh` | Builds debug `.app` with entitlements |
+| `website/` | Static marketing/download site |
+| `README.md` | Public-facing docs + changelog |

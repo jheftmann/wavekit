@@ -1,0 +1,105 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//WaveKit//WSL 2026 Championship Tour//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:2026 WSL Championship Tour
+X-WR-CALDESC:2026 World Surf League Championship Tour — all 12 events
+X-WR-TIMEZONE:UTC
+BEGIN:VEVENT
+UID:wsl-2026-ct-01@wavekit
+SUMMARY:Rip Curl Pro Bells Beach (Presented By Bonsoy)
+LOCATION:Bells Beach\, Victoria\, Australia
+DTSTART;VALUE=DATE:20260401
+DTEND;VALUE=DATE:20260412
+DESCRIPTION:2026 WSL Championship Tour — Event 01\nhttps://www.worldsurfleague.com/events/2026/ct
+END:VEVENT
+BEGIN:VEVENT
+UID:wsl-2026-ct-02@wavekit
+SUMMARY:Western Australia Margaret River Pro
+LOCATION:Margaret River\, Western Australia\, Australia
+DTSTART;VALUE=DATE:20260416
+DTEND;VALUE=DATE:20260427
+DESCRIPTION:2026 WSL Championship Tour — Event 02\nhttps://www.worldsurfleague.com/events/2026/ct
+END:VEVENT
+BEGIN:VEVENT
+UID:wsl-2026-ct-03@wavekit
+SUMMARY:Bonsoy Gold Coast Pro (Presented By GWM)
+LOCATION:Gold Coast\, Queensland\, Australia
+DTSTART;VALUE=DATE:20260501
+DTEND;VALUE=DATE:20260512
+DESCRIPTION:2026 WSL Championship Tour — Event 03\nhttps://www.worldsurfleague.com/events/2026/ct
+END:VEVENT
+BEGIN:VEVENT
+UID:wsl-2026-ct-04@wavekit
+SUMMARY:Corona Cero New Zealand Pro (Presented By Bonsoy)
+LOCATION:Raglan\, New Zealand
+DTSTART;VALUE=DATE:20260515
+DTEND;VALUE=DATE:20260526
+DESCRIPTION:2026 WSL Championship Tour — Event 04\nhttps://www.worldsurfleague.com/events/2026/ct
+END:VEVENT
+BEGIN:VEVENT
+UID:wsl-2026-ct-05@wavekit
+SUMMARY:Surf City El Salvador Pro (Presented By Corona Cero)
+LOCATION:Punta Roca\, La Libertad\, El Salvador
+DTSTART;VALUE=DATE:20260605
+DTEND;VALUE=DATE:20260616
+DESCRIPTION:2026 WSL Championship Tour — Event 05\nhttps://www.worldsurfleague.com/events/2026/ct
+END:VEVENT
+BEGIN:VEVENT
+UID:wsl-2026-ct-06@wavekit
+SUMMARY:VIVO Rio Pro (Presented By Corona Cero)
+LOCATION:Saquarema\, Rio de Janeiro\, Brazil
+DTSTART;VALUE=DATE:20260619
+DTEND;VALUE=DATE:20260628
+DESCRIPTION:2026 WSL Championship Tour — Event 06\nhttps://www.worldsurfleague.com/events/2026/ct
+END:VEVENT
+BEGIN:VEVENT
+UID:wsl-2026-ct-07@wavekit
+SUMMARY:Tahiti Pro (Presented By I-SEA)
+LOCATION:Teahupo'o\, Tahiti\, French Polynesia
+DTSTART;VALUE=DATE:20260808
+DTEND;VALUE=DATE:20260819
+DESCRIPTION:2026 WSL Championship Tour — Event 07\nhttps://www.worldsurfleague.com/events/2026/ct
+END:VEVENT
+BEGIN:VEVENT
+UID:wsl-2026-ct-08@wavekit
+SUMMARY:Fiji Pro (Presented By Corona Cero)
+LOCATION:Cloudbreak\, Fiji
+DTSTART;VALUE=DATE:20260825
+DTEND;VALUE=DATE:20260905
+DESCRIPTION:2026 WSL Championship Tour — Event 08\nhttps://www.worldsurfleague.com/events/2026/ct
+END:VEVENT
+BEGIN:VEVENT
+UID:wsl-2026-ct-09@wavekit
+SUMMARY:Lexus Trestles Pro
+LOCATION:Lower Trestles\, San Clemente\, California\, United States
+DTSTART;VALUE=DATE:20260911
+DTEND;VALUE=DATE:20260921
+DESCRIPTION:2026 WSL Championship Tour — Event 09\nhttps://www.worldsurfleague.com/events/2026/ct
+END:VEVENT
+BEGIN:VEVENT
+UID:wsl-2026-ct-10@wavekit
+SUMMARY:Surf Abu Dhabi
+LOCATION:Hudayriyat Island\, Abu Dhabi\, United Arab Emirates
+DTSTART;VALUE=DATE:20261014
+DTEND;VALUE=DATE:20261019
+DESCRIPTION:2026 WSL Championship Tour — Event 10\nhttps://www.worldsurfleague.com/events/2026/ct
+END:VEVENT
+BEGIN:VEVENT
+UID:wsl-2026-ct-11@wavekit
+SUMMARY:MEO Rip Curl Pro Portugal (Presented By Corona Cero)
+LOCATION:Supertubos\, Peniche\, Portugal
+DTSTART;VALUE=DATE:20261022
+DTEND;VALUE=DATE:20261102
+DESCRIPTION:2026 WSL Championship Tour — Event 11\nhttps://www.worldsurfleague.com/events/2026/ct
+END:VEVENT
+BEGIN:VEVENT
+UID:wsl-2026-ct-12@wavekit
+SUMMARY:Lexus Pipe Masters
+LOCATION:Oahu\, Hawaii\, United States
+DTSTART;VALUE=DATE:20261208
+DTEND;VALUE=DATE:20261221
+DESCRIPTION:2026 WSL Championship Tour — Event 12\nhttps://www.worldsurfleague.com/events/2026/ct
+END:VEVENT
+END:VCALENDAR

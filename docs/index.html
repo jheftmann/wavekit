@@ -74,9 +74,106 @@
             border-radius: 8px;
             font-size: 0.95rem;
         }
+        .cal-section {
+            background: #f0f6ff;
+            border: 1px solid #cce0ff;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 50px;
+        }
+        .cal-section h2 {
+            margin-top: 0;
+            color: #003d99;
+        }
+        .cal-section p {
+            color: #444;
+            margin-bottom: 16px;
+        }
+        .cal-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .cal-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .cal-btn-primary {
+            background: #003d99;
+            color: white;
+        }
+        .cal-btn-primary:hover {
+            background: #002f7a;
+        }
+        .cal-btn-secondary {
+            background: white;
+            color: #003d99;
+            border: 1px solid #003d99;
+        }
+        .cal-btn-secondary:hover {
+            background: #f0f6ff;
+        }
+        .cal-events {
+            margin-top: 20px;
+            font-size: 0.88rem;
+            color: #555;
+        }
+        .cal-events table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .cal-events td {
+            padding: 5px 8px 5px 0;
+            vertical-align: top;
+        }
+        .cal-events td:first-child {
+            white-space: nowrap;
+            color: #888;
+            padding-right: 16px;
+        }
+        details summary {
+            cursor: pointer;
+            color: #003d99;
+            font-size: 0.88rem;
+            margin-top: 12px;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
+    <div class="cal-section">
+        <h2>2026 WSL Championship Tour Calendar</h2>
+        <p>Subscribe to get all 12 Championship Tour events in your calendar — Apple Calendar, Google Calendar, Outlook, and any app that supports iCal.</p>
+        <div class="cal-btns">
+            <a href="webcal://jheftmann.github.io/wavekit/wsl-2026-ct.ics" class="cal-btn cal-btn-primary">Subscribe (Apple / Outlook)</a>
+            <a href="https://www.google.com/calendar/render?cid=webcal://jheftmann.github.io/wavekit/wsl-2026-ct.ics" class="cal-btn cal-btn-secondary">Add to Google Calendar</a>
+            <a href="wsl-2026-ct.ics" class="cal-btn cal-btn-secondary" download>Download .ics</a>
+        </div>
+        <details>
+            <summary>View all 12 events ▾</summary>
+            <div class="cal-events">
+                <table>
+                    <tr><td>Apr 1–11</td><td>Rip Curl Pro Bells Beach — Bells Beach, Australia</td></tr>
+                    <tr><td>Apr 16–26</td><td>Western Australia Margaret River Pro — Margaret River, Australia</td></tr>
+                    <tr><td>May 1–11</td><td>Bonsoy Gold Coast Pro — Gold Coast, Australia</td></tr>
+                    <tr><td>May 15–25</td><td>Corona Cero New Zealand Pro — Raglan, New Zealand</td></tr>
+                    <tr><td>Jun 5–15</td><td>Surf City El Salvador Pro — Punta Roca, El Salvador</td></tr>
+                    <tr><td>Jun 19–27</td><td>VIVO Rio Pro — Saquarema, Brazil</td></tr>
+                    <tr><td>Aug 8–18</td><td>Tahiti Pro — Teahupo'o, French Polynesia</td></tr>
+                    <tr><td>Aug 25–Sep 4</td><td>Fiji Pro — Cloudbreak, Fiji</td></tr>
+                    <tr><td>Sep 11–20</td><td>Lexus Trestles Pro — Lower Trestles, California</td></tr>
+                    <tr><td>Oct 14–18</td><td>Surf Abu Dhabi — Hudayriyat Island, UAE</td></tr>
+                    <tr><td>Oct 22–Nov 1</td><td>MEO Rip Curl Pro Portugal — Supertubos, Peniche</td></tr>
+                    <tr><td>Dec 8–20</td><td>Lexus Pipe Masters — Oahu, Hawaii</td></tr>
+                </table>
+            </div>
+        </details>
+    </div>
+
     <h1>WaveKit</h1>
     <p class="tagline">Surf forecasts in your macOS menu bar</p>
 
