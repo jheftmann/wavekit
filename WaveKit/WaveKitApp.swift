@@ -92,10 +92,8 @@ private var menuBarIcon: some View {
     Group {
         if let url = Bundle.module.url(forResource: "menubar-default", withExtension: "png", subdirectory: "Images"),
            let img = NSImage(contentsOf: url) {
+            img.isTemplate = true  // lets macOS tint for light/dark menu bar
             Image(nsImage: img)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 18, height: 12)
         } else {
             Image(systemName: "water.waves")
         }
