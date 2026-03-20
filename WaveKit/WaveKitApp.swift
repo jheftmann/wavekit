@@ -91,8 +91,10 @@ struct KeyboardInputModifier: ViewModifier {
 private var menuBarNSImage: NSImage? {
     guard let url1x = Bundle.module.url(forResource: "menubar-default",    withExtension: "png", subdirectory: "Images"),
           let url2x = Bundle.module.url(forResource: "menubar-default@2x", withExtension: "png", subdirectory: "Images"),
-          let rep1x = NSBitmapImageRep(contentsOfFile: url1x.path),
-          let rep2x = NSBitmapImageRep(contentsOfFile: url2x.path) else { return nil }
+          let data1x = try? Data(contentsOf: url1x),
+          let data2x = try? Data(contentsOf: url2x),
+          let rep1x = NSBitmapImageRep(data: data1x),
+          let rep2x = NSBitmapImageRep(data: data2x) else { return nil }
 
     // Logical size in points = @1x pixel dimensions.
     // Set @2x rep's size to the same logical size so macOS knows it's
