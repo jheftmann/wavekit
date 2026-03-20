@@ -1,16 +1,25 @@
 import Foundation
 import Combine
 
+enum SortMode: String {
+    case distance
+    case manual
+}
+
 @MainActor
 final class FavoritesStore: ObservableObject {
     static let shared = FavoritesStore()
 
     @Published private(set) var spots: [Spot] = []
+    @Published var sortMode: SortMode = .manual
 
     private let userDefaultsKey = "surfline_favorite_spots"
+    private let sortModeKey = "wavekit_sort_mode"
 
     private init() {
         loadSpots()
+        let saved = UserDefaults.standard.string(forKey: sortModeKey) ?? "manual"
+        sortMode = SortMode(rawValue: saved) ?? .manual
     }
 
     private func loadSpots() {
@@ -46,6 +55,11 @@ final class FavoritesStore: ObservableObject {
     func moveSpot(from source: IndexSet, to destination: Int) {
         spots.move(fromOffsets: source, toOffset: destination)
         saveSpots()
+    }
+
+    func setSortMode(_ mode: SortMode) {
+        sortMode = mode
+        UserDefaults.standard.set(mode.rawValue, forKey: sortModeKey)
     }
 
     func addSpotFromURL(_ urlString: String) -> Result<Spot, AddSpotError> {
@@ -90,13 +104,12 @@ final class FavoritesStore: ObservableObject {
         saveSpots()
     }
 
-    func sortByDistance(from locationManager: LocationManager) {
-        spots.sort { spot1, spot2 in
+    func spotsSortedByDistance(using locationManager: LocationManager) -> [Spot] {
+        spots.sorted { spot1, spot2 in
             let distance1 = locationManager.distance(to: spot1) ?? .greatestFiniteMagnitude
             let distance2 = locationManager.distance(to: spot2) ?? .greatestFiniteMagnitude
             return distance1 < distance2
         }
-        saveSpots()
     }
 
     enum AddSpotError: LocalizedError {

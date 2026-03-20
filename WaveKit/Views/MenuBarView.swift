@@ -33,15 +33,19 @@ struct MenuBarView: View {
                     .help("Settings")
                 }
 
-                // View mode toggle (only show if logged in and has spots)
+                // View mode + sort toggles (only show if logged in and has spots)
                 if authManager.isLoggedIn && !favoritesStore.spots.isEmpty {
-                    Picker("View", selection: $viewMode) {
-                        ForEach(ViewMode.allCases, id: \.self) { mode in
-                            Text(mode.rawValue).tag(mode)
+                    HStack(spacing: 8) {
+                        Picker("View", selection: $viewMode) {
+                            ForEach(ViewMode.allCases, id: \.self) { mode in
+                                Text(mode.rawValue).tag(mode)
+                            }
                         }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+
+                        sortToggle
                     }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
                 }
             }
             .padding(.horizontal, 12)
@@ -70,18 +74,6 @@ struct MenuBarView: View {
         .onChange(of: favoritesStore.spots) { _, newSpots in
             Task {
                 await api.fetchForecasts(for: newSpots)
-            }
-        }
-        .onChange(of: locationManager.userLocation) { _, _ in
-            // Sort spots when location is available
-            if locationManager.userLocation != nil {
-                favoritesStore.sortByDistance(from: locationManager)
-            }
-        }
-        .onChange(of: api.lastUpdated) { _, _ in
-            // Sort after forecasts load (coordinates are now saved)
-            if locationManager.userLocation != nil {
-                favoritesStore.sortByDistance(from: locationManager)
             }
         }
     }
@@ -120,11 +112,31 @@ struct MenuBarView: View {
         .padding(.horizontal, 16)
     }
 
+    private var displayedSpots: [Spot] {
+        if favoritesStore.sortMode == .distance {
+            return favoritesStore.spotsSortedByDistance(using: locationManager)
+        }
+        return favoritesStore.spots
+    }
+
+    private var sortToggle: some View {
+        Picker("Sort", selection: Binding(
+            get: { favoritesStore.sortMode },
+            set: { favoritesStore.setSortMode($0) }
+        )) {
+            Image(systemName: "location.fill").tag(SortMode.distance)
+            Image(systemName: "list.bullet").tag(SortMode.manual)
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .frame(width: 56)
+    }
+
     private let rowHeight: CGFloat = 85
     private let maxVisibleRows: Int = 5
 
     private var spotListView: some View {
-        let spotCount = favoritesStore.spots.count
+        let spotCount = displayedSpots.count
         let visibleRows = min(spotCount, maxVisibleRows)
         let listHeight = CGFloat(visibleRows) * rowHeight
 
@@ -139,9 +151,10 @@ struct MenuBarView: View {
     }
 
     private var forecastListView: some View {
-        ScrollView {
+        let spots = displayedSpots
+        return ScrollView {
             LazyVStack(spacing: 0) {
-                ForEach(favoritesStore.spots) { spot in
+                ForEach(spots) { spot in
                     Button {
                         openSpotInBrowser(spot)
                     } label: {
@@ -152,7 +165,7 @@ struct MenuBarView: View {
                     }
                     .buttonStyle(.plain)
 
-                    if spot.id != favoritesStore.spots.last?.id {
+                    if spot.id != spots.last?.id {
                         Divider()
                             .padding(.leading, 12)
                     }
@@ -162,9 +175,10 @@ struct MenuBarView: View {
     }
 
     private var todayListView: some View {
-        ScrollView {
+        let spots = displayedSpots
+        return ScrollView {
             LazyVStack(spacing: 0) {
-                ForEach(favoritesStore.spots) { spot in
+                ForEach(spots) { spot in
                     Button {
                         openSpotInBrowser(spot)
                     } label: {
@@ -175,7 +189,7 @@ struct MenuBarView: View {
                     }
                     .buttonStyle(.plain)
 
-                    if spot.id != favoritesStore.spots.last?.id {
+                    if spot.id != spots.last?.id {
                         Divider()
                             .padding(.leading, 12)
                     }
