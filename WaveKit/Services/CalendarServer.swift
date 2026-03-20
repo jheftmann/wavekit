@@ -47,18 +47,26 @@ final class CalendarServer {
     // MARK: - Connection Handling
 
     private func handle(_ connection: NWConnection) {
+        NSLog("CalendarServer: new connection from \(connection.endpoint)")
         connection.start(queue: queue)
-        connection.receive(minimumIncompleteLength: 1, maximumLength: 65_536) { [weak self] data, _, _, error in
+        connection.receive(minimumIncompleteLength: 1, maximumLength: 65_536) { [weak self] data, _, isComplete, error in
+            if let error { NSLog("CalendarServer: receive error: \(error)") }
             guard let self, let data, !data.isEmpty else {
+                NSLog("CalendarServer: empty/nil data, isComplete=\(isComplete), cancelling")
                 connection.cancel()
                 return
             }
 
+            let rawHead = data.prefix(200)
+            NSLog("CalendarServer: received \(data.count) bytes, head: \(String(bytes: rawHead, encoding: .utf8) ?? rawHead.map { String(format: "%02x", $0) }.joined())")
+
             let request = String(data: data, encoding: .utf8) ?? ""
             let path = self.parsePath(from: request)
+            NSLog("CalendarServer: path=\(path)")
             let responseData = self.responseData(for: path)
 
-            connection.send(content: responseData, completion: .contentProcessed { _ in
+            connection.send(content: responseData, completion: .contentProcessed { err in
+                if let err { NSLog("CalendarServer: send error: \(err)") }
                 connection.cancel()
             })
         }
