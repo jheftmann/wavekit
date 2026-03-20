@@ -117,30 +117,11 @@
         .cal-btn-secondary:hover {
             background: #f0f6ff;
         }
-        .cal-events {
-            margin-top: 20px;
+.cal-schedule-link {
+            display: inline-block;
+            margin-top: 14px;
             font-size: 0.88rem;
-            color: #555;
-        }
-        .cal-events table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .cal-events td {
-            padding: 5px 8px 5px 0;
-            vertical-align: top;
-        }
-        .cal-events td:first-child {
-            white-space: nowrap;
-            color: #888;
-            padding-right: 16px;
-        }
-        details summary {
-            cursor: pointer;
             color: #003d99;
-            font-size: 0.88rem;
-            margin-top: 12px;
-            user-select: none;
         }
     </style>
 </head>
@@ -153,25 +134,7 @@
             <a href="https://www.google.com/calendar/render?cid=webcal://jheftmann.github.io/wavekit/wsl-2026-ct.ics" class="cal-btn cal-btn-secondary">Add to Google Calendar</a>
             <a href="wsl-2026-ct.ics" class="cal-btn cal-btn-secondary" download>Download .ics</a>
         </div>
-        <details>
-            <summary>View all 12 events ▾</summary>
-            <div class="cal-events">
-                <table>
-                    <tr><td>Apr 1–11</td><td>Rip Curl Pro Bells Beach — Bells Beach, Australia</td></tr>
-                    <tr><td>Apr 16–26</td><td>Western Australia Margaret River Pro — Margaret River, Australia</td></tr>
-                    <tr><td>May 1–11</td><td>Bonsoy Gold Coast Pro — Gold Coast, Australia</td></tr>
-                    <tr><td>May 15–25</td><td>Corona Cero New Zealand Pro — Raglan, New Zealand</td></tr>
-                    <tr><td>Jun 5–15</td><td>Surf City El Salvador Pro — Punta Roca, El Salvador</td></tr>
-                    <tr><td>Jun 19–27</td><td>VIVO Rio Pro — Saquarema, Brazil</td></tr>
-                    <tr><td>Aug 8–18</td><td>Tahiti Pro — Teahupo'o, French Polynesia</td></tr>
-                    <tr><td>Aug 25–Sep 4</td><td>Fiji Pro — Cloudbreak, Fiji</td></tr>
-                    <tr><td>Sep 11–20</td><td>Lexus Trestles Pro — Lower Trestles, California</td></tr>
-                    <tr><td>Oct 14–18</td><td>Surf Abu Dhabi — Hudayriyat Island, UAE</td></tr>
-                    <tr><td>Oct 22–Nov 1</td><td>MEO Rip Curl Pro Portugal — Supertubos, Peniche</td></tr>
-                    <tr><td>Dec 8–20</td><td>Lexus Pipe Masters — Oahu, Hawaii</td></tr>
-                </table>
-            </div>
-        </details>
+        <a href="https://www.worldsurfleague.com/events/2026/ct?all=1" class="cal-schedule-link" target="_blank" rel="noopener">View the schedule on the WSL website →</a>
     </div>
 
     <h1>WaveKit</h1>
