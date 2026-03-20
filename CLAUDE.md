@@ -19,6 +19,13 @@ GitHub: https://github.com/jheftmann/wavekit
 - Forecast view uses horizontal scroll to show 16 days; window was widened to fit 6 days visible at once
 - Focus effects disabled on all buttons for a cleaner macOS menu bar aesthetic
 - Version tracked in a `VERSION` file (used by the website build and ZIP packaging)
+- Per-spot calendar subscription uses EventKit (writes directly to macOS calendar store); works with Apple Calendar and Notion Calendar. Google Calendar and PC support deferred to roadmap.
+- Apple Calendar blocks webcal://localhost subscriptions — EventKit is the correct Mac-native approach
+- ICS line folding (RFC 5545, 75-byte limit) required for Apple Calendar compatibility; fold() helper in ICSGenerator.swift
+- Forecasts are fetched on app launch (WaveKitApp.init Task) so CalendarManager has data before the user opens the popover
+- App icon uses .icns (generated via iconutil from .iconset); menu bar icon is a template image (macOS auto-tints for light/dark)
+- Website is plain HTML in docs/ — decided against Jekyll/Markdown since the complexity is in CSS/layout, not content
+- Terms of Use page at docs/terms.html — covers no-warranty, liability, no-affiliation (Surfline/WSL), third-party data, MIT license
 
 ---
 
@@ -37,9 +44,10 @@ GitHub: https://github.com/jheftmann/wavekit
 - iCloud sync for saved spots across devices
 - Multiple location profiles (e.g., "Home", "On a trip")
 - Offline/cached forecast for last-known conditions
-- App icon and proper macOS app bundle for release distribution
 - Mac App Store submission
 - Auto-update mechanism (Sparkle or similar)
+- Calendar subscription support for Google Calendar and non-Mac clients (ICS file export or hosted feed)
+- Visual redesign of the menu bar popover (design in Figma first)
 
 ---
 
@@ -123,5 +131,9 @@ When shipping a new version:
 | `WaveKit/Resources/` | Assets |
 | `VERSION` | Single source of version truth |
 | `bundle-debug.sh` | Builds debug `.app` with entitlements |
-| `website/` | Static marketing/download site |
+| `docs/index.html` | Website homepage (GitHub Pages) |
+| `docs/terms.html` | Terms of Use page |
+| `docs/wsl-2026-ct.ics` | WSL 2026 CT calendar subscription |
+| `WaveKit/Services/CalendarManager.swift` | EventKit calendar sync |
+| `WaveKit/Services/ICSGenerator.swift` | ICS content generator (RFC 5545) |
 | `README.md` | Public-facing docs + changelog |
