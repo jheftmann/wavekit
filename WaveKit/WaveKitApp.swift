@@ -88,11 +88,16 @@ struct KeyboardInputModifier: ViewModifier {
 
 // MARK: - Menu Bar Icon
 
+private var menuBarNSImage: NSImage? {
+    guard let url = Bundle.module.url(forResource: "menubar-default", withExtension: "png", subdirectory: "Images"),
+          let img = NSImage(contentsOf: url) else { return nil }
+    img.isTemplate = true  // macOS tints for light/dark menu bar
+    return img
+}
+
 private var menuBarIcon: some View {
     Group {
-        if let url = Bundle.module.url(forResource: "menubar-default", withExtension: "png", subdirectory: "Images"),
-           let img = NSImage(contentsOf: url) {
-            img.isTemplate = true  // lets macOS tint for light/dark menu bar
+        if let img = menuBarNSImage {
             Image(nsImage: img)
         } else {
             Image(systemName: "water.waves")
