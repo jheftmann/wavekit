@@ -176,6 +176,19 @@
     .screenshot-panel-wide img {
       max-width: 100%;
     }
+    /* Composite: two phone screenshots side by side */
+    .composite-pair {
+      display: flex;
+      gap: 12px;
+    }
+    .composite-pair img {
+      width: 131px;
+      height: 284px;
+      object-fit: cover;
+      object-position: center top;
+      border-radius: 22px;
+      flex-shrink: 0;
+    }
 
     /* ─────────────────────────────────────────────────────
        NARROW layout (default — single column)
@@ -325,10 +338,13 @@
       <p>If you have iCloud syncing set up between your Mac and your iOS devices the calendar(s) will also appear on your other devices.</p>
       <div class="callout">For now this feature is only supported on native calendar apps like Apple Calendar (macOS/iOS) and Notion Calendar. Google Calendar support is on the roadmap.</div>
 
-      <!-- Screenshot 4: Forecast detail (narrow only) -->
+      <!-- Screenshot 4: Calendar composite — two iPhone screenshots (narrow only) -->
       <div class="screenshot-inline">
-        <div class="screenshot-panel screenshot-panel-wide">
-          <img src="screenshot-detail.png" alt="WaveKit forecast detail">
+        <div class="screenshot-panel">
+          <div class="composite-pair">
+            <img src="screenshot-detail-left.png" alt="WaveKit calendar event detail">
+            <img src="screenshot-detail-right.png" alt="WaveKit calendar day view">
+          </div>
         </div>
       </div>
 
@@ -353,7 +369,7 @@
 
     </div><!-- /.app-main -->
 
-    <!-- Right column: 4 screenshots stacked (wide only) -->
+    <!-- Right column: 3 screenshots stacked (wide only) -->
     <div class="screenshot-sidebar">
       <div class="screenshot-panel">
         <img src="screenshot-forecast.png" alt="WaveKit forecast view">
@@ -363,9 +379,6 @@
       </div>
       <div class="screenshot-panel">
         <img src="screenshot-settings.png" alt="WaveKit settings">
-      </div>
-      <div class="screenshot-panel screenshot-panel-wide">
-        <img src="screenshot-detail.png" alt="WaveKit forecast detail">
       </div>
     </div>
 
