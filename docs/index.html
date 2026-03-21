@@ -163,33 +163,31 @@
     .screenshot-panel {
       background: var(--black);
       border-radius: 24px;
-      padding: 36px 37px;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
     }
     .screenshot-panel img {
       border-radius: 12px;
+      max-width: 275px;
       width: 100%;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .screenshot-panel-wide img {
+      max-width: 100%;
     }
 
     /* ─────────────────────────────────────────────────────
        NARROW layout (default — single column)
-       Screenshot sits inline between description & install
+       Screenshots sit inline between content sections
     ───────────────────────────────────────────────────── */
-    .app-layout {
-      display: block;
-    }
-    /* inline screenshot: shown on narrow, hidden on wide */
-    .screenshot-inline {
-      margin: 24px 0;
-    }
-    /* sidebar screenshot: hidden on narrow */
-    .screenshot-sidebar {
-      display: none;
-    }
+    .app-layout { display: block; }
+    .screenshot-inline { margin: 32px 0; }
+    .screenshot-sidebar { display: none; }
 
     /* ─────────────────────────────────────────────────────
        WIDE layout (≥ 1100px) — two columns
-       Content left (660px), screenshot sticky right
+       Content left (660px), screenshots right (stacked)
     ───────────────────────────────────────────────────── */
     @media (min-width: 1100px) {
       .app-layout {
@@ -197,19 +195,13 @@
         gap: 138px;
         align-items: flex-start;
       }
-      .app-main {
-        flex: 0 0 660px;
-      }
-      /* inline screenshot hidden on wide */
-      .screenshot-inline {
-        display: none;
-      }
-      /* sidebar screenshot shown & sticky on wide */
+      .app-main { flex: 0 0 660px; }
+      .screenshot-inline { display: none; }
       .screenshot-sidebar {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
         flex: 0 1 546px;
-        position: sticky;
-        top: 48px;
       }
     }
 
@@ -264,10 +256,10 @@
         <li>Click any spot to open it on Surfline</li>
       </ul>
 
-      <!-- Screenshot inline (narrow only) -->
+      <!-- Screenshot 1: Forecast tab (narrow only) -->
       <div class="screenshot-inline">
         <div class="screenshot-panel">
-          <img src="screenshot.png" alt="WaveKit app screenshot">
+          <img src="screenshot-forecast.png" alt="WaveKit forecast view">
         </div>
       </div>
 
@@ -293,6 +285,13 @@
       <p>Click the <strong>+</strong> button, then paste a Surfline URL.</p>
       <div class="callout">Surfline URLs look like <strong>surfline.com/surf-report/...</strong></div>
 
+      <!-- Screenshot 3: Settings (narrow only) -->
+      <div class="screenshot-inline">
+        <div class="screenshot-panel">
+          <img src="screenshot-settings.png" alt="WaveKit settings">
+        </div>
+      </div>
+
       <hr class="divider-sub">
 
       <h4>View spots by distance or manually</h4>
@@ -308,6 +307,13 @@
       </ul>
       <div class="callout">Sign in with your Surfline account in Settings (⛭) to unlock the full 16-day forecast.</div>
 
+      <!-- Screenshot 2: Today tab (narrow only) -->
+      <div class="screenshot-inline">
+        <div class="screenshot-panel">
+          <img src="screenshot-today.png" alt="WaveKit today view">
+        </div>
+      </div>
+
       <hr class="divider-sub">
 
       <h4>Subscribe to conditions in your calendar app <em style="font-weight:400;font-size:14px;">(experimental)</em></h4>
@@ -318,7 +324,14 @@
       </ol>
       <p>If you have iCloud syncing set up between your Mac and your iOS devices the calendar(s) will also appear on your other devices.</p>
       <div class="callout">For now this feature is only supported on native calendar apps like Apple Calendar (macOS/iOS) and Notion Calendar. Google Calendar support is on the roadmap.</div>
-    
+
+      <!-- Screenshot 4: Forecast detail (narrow only) -->
+      <div class="screenshot-inline">
+        <div class="screenshot-panel screenshot-panel-wide">
+          <img src="screenshot-detail.png" alt="WaveKit forecast detail">
+        </div>
+      </div>
+
       <hr class="divider-sub">
 
       <!-- Updates -->
@@ -340,10 +353,19 @@
 
     </div><!-- /.app-main -->
 
-    <!-- Right column: screenshot sticky (wide only) -->
+    <!-- Right column: 4 screenshots stacked (wide only) -->
     <div class="screenshot-sidebar">
       <div class="screenshot-panel">
-        <img src="screenshot.png" alt="WaveKit app screenshot">
+        <img src="screenshot-forecast.png" alt="WaveKit forecast view">
+      </div>
+      <div class="screenshot-panel">
+        <img src="screenshot-today.png" alt="WaveKit today view">
+      </div>
+      <div class="screenshot-panel">
+        <img src="screenshot-settings.png" alt="WaveKit settings">
+      </div>
+      <div class="screenshot-panel screenshot-panel-wide">
+        <img src="screenshot-detail.png" alt="WaveKit forecast detail">
       </div>
     </div>
 
