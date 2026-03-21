@@ -16,6 +16,8 @@ struct MenuBarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            Color.clear.frame(height: 0)
+                .onAppear { NSApp.keyWindow?.makeFirstResponder(nil) }
             // Header with toggle
             VStack(spacing: 8) {
                 HStack {
