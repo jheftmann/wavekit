@@ -18,8 +18,8 @@ struct ICSGenerator {
             "BEGIN:VCALENDAR",
             "VERSION:2.0",
             "PRODID:-//WaveKit//Surf Forecast//EN",
-            "X-WR-CALNAME:\(forecast.spotName)",
-            "X-WR-CALDESC:Surf forecast for \(forecast.spotName)",
+            "X-WR-CALNAME:\(escapeText(forecast.spotName))",
+            "X-WR-CALDESC:Surf forecast for \(escapeText(forecast.spotName))",
             "CALSCALE:GREGORIAN",
             "METHOD:PUBLISH",
             "REFRESH-INTERVAL;VALUE=DURATION:PT30M",
@@ -36,7 +36,7 @@ struct ICSGenerator {
             for seg in segments {
                 let startStr = floatingTime(dayStart: day.date, hour: seg.startHour, utcOffset: day.utcOffset)
                 let endStr   = floatingTime(dayStart: day.date, hour: seg.endHour,   utcOffset: day.utcOffset)
-                let title    = "\(day.waveDisplay) · \(seg.rating.displayName)"
+                let title    = escapeText("\(day.waveDisplay) · \(seg.rating.displayName)")
                 let uid      = "\(forecast.id)-\(dayStamp(day.date))-\(seg.label)@wavekit"
                 let desc     = description(for: seg.label, day: day, forecast: forecast)
 
@@ -56,6 +56,16 @@ struct ICSGenerator {
 
         lines.append("END:VCALENDAR")
         return lines.map { fold($0) }.joined(separator: "\r\n")
+    }
+
+    // RFC 5545 §3.3.11: escape text-field special characters
+    private static func escapeText(_ text: String) -> String {
+        text
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: ";",  with: "\\;")
+            .replacingOccurrences(of: ",",  with: "\\,")
+            .replacingOccurrences(of: "\n", with: "\\n")
+            .replacingOccurrences(of: "\r", with: "")
     }
 
     // RFC 5545 §3.1: fold lines exceeding 75 octets
@@ -111,9 +121,7 @@ struct ICSGenerator {
             parts.append("Swell direction: \(day.directionArrows) \(Int(dir))°")
         }
 
-        // Escape special ICS chars
-        return parts.joined(separator: "\\n")
-            .replacingOccurrences(of: ",", with: "\\,")
+        return escapeText(parts.joined(separator: "\\n"))
     }
 
     private static func emptyCalendar() -> String {
