@@ -65,7 +65,7 @@ final class CalendarManager: ObservableObject {
         let utcOffset = forecast.extendedForecast.first?.utcOffset ?? 0
         let spotTZ = TimeZone(secondsFromGMT: utcOffset * 3600) ?? .current
 
-        guard let calendarId = getOrCreateCalendar(for: spotId, name: forecast.spotName),
+        guard let calendarId = getOrCreateCalendar(for: spotId, name: "🌊 \(forecast.spotName)"),
               let calendar = store.calendar(withIdentifier: calendarId) else { return }
 
         // Remove old events
@@ -134,9 +134,13 @@ final class CalendarManager: ObservableObject {
     }
 
     private func getOrCreateCalendar(for spotId: String, name: String) -> String? {
-        // Return existing if still valid
+        // Return existing if still valid, updating title if needed
         if let existing = UserDefaults.standard.string(forKey: calIdKey(spotId)),
-           store.calendar(withIdentifier: existing) != nil {
+           let cal = store.calendar(withIdentifier: existing) {
+            if cal.title != name {
+                cal.title = name
+                try? store.saveCalendar(cal, commit: true)
+            }
             return existing
         }
 
