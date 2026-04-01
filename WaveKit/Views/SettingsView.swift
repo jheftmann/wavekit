@@ -97,7 +97,7 @@ struct SettingsView: View {
             // Footer
             Divider()
             HStack {
-                Text("WaveKit v1.0")
+                Text("WaveKit v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 Spacer()
