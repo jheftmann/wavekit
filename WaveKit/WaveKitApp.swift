@@ -12,6 +12,13 @@ struct WaveKitApp: App {
             await SurflineAPI.shared.fetchForecasts(for: FavoritesStore.shared.spots)
             CalendarManager.shared.syncAll(forecasts: SurflineAPI.shared.forecasts)
         }
+        // Refresh forecasts and calendar every 30 minutes in the background
+        Timer.scheduledTimer(withTimeInterval: 30 * 60, repeats: true) { _ in
+            Task { @MainActor in
+                await SurflineAPI.shared.fetchForecasts(for: FavoritesStore.shared.spots)
+                CalendarManager.shared.syncAll(forecasts: SurflineAPI.shared.forecasts)
+            }
+        }
     }
 
     var body: some Scene {
