@@ -78,6 +78,15 @@ Grant location permission when prompted to automatically sort spots by distance 
 - Increase window width to fit 6 days
 - Add debug app bundle script for development
 
+### 2026-03-31 — v1.1.0
+- Custom app icon and menu bar icon
+- Per-spot calendar subscription via Apple Calendar / Notion Calendar (experimental)
+- Manual drag-to-reorder and distance sort toggle for saved spots
+- 2026 WSL Championship Tour calendar subscription (website)
+- Terms of Use page
+- Website redesign
+- OG image, favicon, apple touch icon
+
 ### 2025-01-24
 - Add tide and wind data to Today view
 - Compact layout with inline swell/wind display
