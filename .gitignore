@@ -9,6 +9,10 @@ DerivedData/
 # macOS
 .DS_Store
 
+# Local working files
+screenshots/
+docs/WaveKit-*.zip
+
 # Xcode user data
 xcuserdata/
 *.xcworkspace/xcuserdata/

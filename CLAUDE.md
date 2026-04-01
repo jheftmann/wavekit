@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-WaveKit is a macOS menu bar app (Swift/SwiftUI, macOS 14+) that shows surf forecasts from the Surfline API for saved favorite spots. Current version: **1.0.0**.
+WaveKit is a macOS menu bar app (Swift/SwiftUI, macOS 14+) that shows surf forecasts from the Surfline API for saved favorite spots. Current version: **1.1.0**.
 
 GitHub: https://github.com/jheftmann/wavekit
 
@@ -26,6 +26,12 @@ GitHub: https://github.com/jheftmann/wavekit
 - App icon uses .icns (generated via iconutil from .iconset); menu bar icon is a template image (macOS auto-tints for light/dark)
 - Website is plain HTML in docs/ — decided against Jekyll/Markdown since the complexity is in CSS/layout, not content
 - Terms of Use page at docs/terms.html — covers no-warranty, liability, no-affiliation (Surfline/WSL), third-party data, MIT license
+- App version read from `CFBundleShortVersionString` in `Bundle.main` — hook writes VERSION into Info.plist on every build, no hardcoding needed
+- Calendar names prefixed with 🌊 (e.g. "🌊 Lower Trestles"); existing calendars auto-renamed on next sync
+- Forecasts refresh every 30 minutes via `Timer.scheduledTimer` in `WaveKitApp.init` (in addition to on-launch and on-popover-open)
+- `screenshots/` and `docs/WaveKit-*.zip` are .gitignored (local working files)
+- Website two-column layout at ≥1100px breakpoint; single column below
+- Post-commit hook handles full release: build, copy to /Applications, package ZIP, restart app — committing to main IS deploying
 
 ---
 
@@ -53,34 +59,15 @@ GitHub: https://github.com/jheftmann/wavekit
 
 ## Workflow
 
-### General Rules
+### Notes
+- Changelog lives in `README.md` (not a separate `CHANGELOG.md`) — add entries under a new date heading.
+- **If the next task is a significantly different feature from the current branch:** ask before starting — "This is unrelated to the current branch. Should I create a new branch first?"
 
-- Keep `CHANGELOG` section in `README.md` current — add entries under a new date heading with each meaningful change.
-- Keep `CLAUDE.md` updated at the end of every session (decisions, roadmap, pending items).
-- Keep `README.md` accurate: features list, installation steps, usage.
-- **Before building a new feature:** open a GitHub issue first. Work on a feature branch named after the issue (e.g., `feature/42-notifications`).
-- **If the next task is a significantly different feature from the current branch:** ask before starting — "This is unrelated to the current branch. Should I create a new branch first?" Do not silently pile unrelated features onto an existing branch.
-- **After deploying a feature:** update the issue to "needs verification" or open a new verification issue, then close it once confirmed working.
-- If old open PRs are piling up, flag them and ask to merge or close before starting new work.
-- Clean up merged branches after PRs are merged.
-- "Push", "deploy", or "ship" means: bump `VERSION` if needed, build release, update changelog, commit, push, merge PR.
-
-### Starting a New Session
-
-1. Open the project repo: https://github.com/jheftmann/wavekit
-2. Open project directory in Finder: `open /Users/studio/Dev/WaveKit`
-3. Open project directory in Terminal: `cd /Users/studio/Dev/WaveKit`
-4. Open in VSCode: `code /Users/studio/Dev/WaveKit`
-5. Build debug app for local testing: `./bundle-debug.sh && open .build/debug/WaveKit-Dev.app`
-6. No local server needed — this is a native macOS app, not a web app.
-   - For the **website**: `cd website && open index.html` (static HTML, no server required)
-
-### Ending a Session
-
-1. Update `CLAUDE.md`: log any new decisions, pending items, or roadmap changes.
-2. Update `README.md` changelog section with what changed.
-3. Commit any loose changes with a descriptive message.
-4. Confirm all open issues reflect current state.
+### Starting a session (project-specific)
+- Repo: https://github.com/jheftmann/wavekit
+- Project dir: `/Users/studio/Dev/WaveKit`
+- Build debug app: `./bundle-debug.sh && open .build/debug/WaveKit-Dev.app`
+- No local server needed — native macOS app. For the website: `open docs/index.html`
 
 ---
 
@@ -105,7 +92,7 @@ cp "docs/WaveKit-${VERSION}.zip" docs/WaveKit.zip
 open .build/debug/WaveKit-Dev.app
 ```
 
-Version is stored in `VERSION` (currently `1.0.0`). Always bump it before a release, then update the version string in `docs/index.html` (`<span class="version">vX.Y.Z</span>`) and the `href` on the download button if using a versioned filename.
+Version is stored in `VERSION` (currently `1.1.0`). Always bump it before a release, then update the download button label in `docs/index.html` and add a changelog entry.
 
 When shipping a new version:
 1. Bump `VERSION` file
