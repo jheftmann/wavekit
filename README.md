@@ -1,5 +1,7 @@
 # WaveKit
 
+**https://jheftmann.github.io/wavekit/**
+
 A macOS menu bar app for tracking surf conditions at your favorite spots using Surfline data.
 
 ## Description

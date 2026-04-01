@@ -18,7 +18,7 @@ struct ICSGenerator {
             "BEGIN:VCALENDAR",
             "VERSION:2.0",
             "PRODID:-//WaveKit//Surf Forecast//EN",
-            "X-WR-CALNAME:\(escapeText(forecast.spotName))",
+            "X-WR-CALNAME:🌊 \(escapeText(forecast.spotName))",
             "X-WR-CALDESC:Surf forecast for \(escapeText(forecast.spotName))",
             "CALSCALE:GREGORIAN",
             "METHOD:PUBLISH",
