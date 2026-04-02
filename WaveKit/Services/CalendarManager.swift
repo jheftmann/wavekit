@@ -90,7 +90,7 @@ final class CalendarManager: ObservableObject {
 
                 let event = EKEvent(eventStore: store)
                 event.calendar = calendar
-                event.title = "\(day.waveDisplay) · \(rating.displayName)"
+                event.title = "\(forecast.spotName) · \(day.waveDisplay) · \(rating.displayName)"
                 event.startDate = day.date.addingTimeInterval(TimeInterval(startHour * 3600))
                 event.endDate   = day.date.addingTimeInterval(TimeInterval(endHour * 3600))
                 event.timeZone  = spotTZ
