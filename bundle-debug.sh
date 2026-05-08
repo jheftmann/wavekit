@@ -34,7 +34,7 @@ cat > "$CONTENTS_DIR/Info.plist" << 'PLIST'
     <key>CFBundleExecutable</key>
     <string>WaveKit</string>
     <key>CFBundleIconFile</key>
-    <string>AppIcon.icns</string>
+    <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
     <string>com.wavekit.dev</string>
     <key>CFBundleName</key>
@@ -56,6 +56,9 @@ cat > "$CONTENTS_DIR/Info.plist" << 'PLIST'
 </dict>
 </plist>
 PLIST
+
+# PkgInfo — required for Finder to recognize the app type and render the icon
+printf 'APPL????' > "$CONTENTS_DIR/PkgInfo"
 
 # Sign with entitlements
 codesign --force --sign - --entitlements "WaveKit/WaveKit.debug.entitlements" "$APP_DIR"

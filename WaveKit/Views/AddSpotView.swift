@@ -6,6 +6,7 @@ struct AddSpotView: View {
 
     @State private var urlText = ""
     @State private var errorMessage: String?
+    @State private var didAdd = false
 
     @FocusState private var isURLFieldFocused: Bool
 
@@ -55,9 +56,9 @@ struct AddSpotView: View {
                 }
                 .keyboardShortcut(.cancelAction)
 
-                Button("Add Spot", action: addSpot)
+                Button(didAdd ? "Added!" : "Add Spot", action: addSpot)
                     .keyboardShortcut(.defaultAction)
-                    .disabled(urlText.isEmpty)
+                    .disabled(urlText.isEmpty || didAdd)
             }
 
             // Paste button
@@ -88,7 +89,12 @@ struct AddSpotView: View {
 
         switch favoritesStore.addSpotFromURL(urlText) {
         case .success:
-            dismiss()
+            didAdd = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                urlText = ""
+                didAdd = false
+                isURLFieldFocused = true
+            }
         case .failure(let error):
             errorMessage = error.localizedDescription
         }

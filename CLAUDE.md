@@ -72,11 +72,12 @@ When shipping a new version:
 2. Run `./bundle-release.sh` — builds, signs, and packages the ZIP
 3. Update `README.md` changelog section with new features
 4. Update `docs/index.html`:
-   - Update download button text: `Download WaveKit (vX.Y.Z)`
+   - **Update download button text** (line ~294): `Download WaveKit (vX.Y.Z)` — must match VERSION
    - Replace screenshots as needed (`screenshot-forecast.png`, `screenshot-today.png`, `screenshot-settings.png`, `screenshot-detail-left.png`, `screenshot-detail-right.png`)
    - Update features list / description to reflect new functionality
    - Add any new sections for major features
-5. Commit, push, merge PR
+5. Update version reference in `CLAUDE.md` ("currently `X.Y.Z`")
+6. Commit, push
 
 ---
 

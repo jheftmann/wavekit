@@ -71,7 +71,7 @@ struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.vertical, 8)
                 } else {
-                    List {
+                    VStack(spacing: 0) {
                         ForEach(favoritesStore.spots) { spot in
                             HStack(spacing: 8) {
                                 Image(systemName: "line.3.horizontal")
@@ -82,12 +82,13 @@ struct SettingsView: View {
                                 calendarButton(for: spot)
                                 trashButton(for: spot)
                             }
-                        }
-                        .onMove { from, to in
-                            favoritesStore.moveSpot(from: from, to: to)
+                            .padding(.vertical, 6)
+                            .frame(maxWidth: .infinity)
+                            if spot.id != favoritesStore.spots.last?.id {
+                                Divider()
+                            }
                         }
                     }
-                    .frame(height: min(CGFloat(favoritesStore.spots.count) * 32 + 20, 200))
                 }
             }
             .padding()

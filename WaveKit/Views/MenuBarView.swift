@@ -19,7 +19,7 @@ struct MenuBarView: View {
             Color.clear.frame(height: 0)
                 .onAppear { NSApp.keyWindow?.makeFirstResponder(nil) }
             // Header with toggle
-            VStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("WaveKit")
                         .font(.headline)
@@ -38,18 +38,12 @@ struct MenuBarView: View {
                 // View mode + sort toggles (only show if logged in and has spots)
                 if authManager.isLoggedIn && !favoritesStore.spots.isEmpty {
                     HStack(spacing: 8) {
-                        Picker("View", selection: $viewMode) {
-                            ForEach(ViewMode.allCases, id: \.self) { mode in
-                                Text(mode.rawValue).tag(mode)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .labelsHidden()
-
+                        viewModeToggle
                         sortToggle
                     }
                 }
             }
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
 
@@ -119,6 +113,16 @@ struct MenuBarView: View {
             return favoritesStore.spotsSortedByDistance(using: locationManager)
         }
         return favoritesStore.spots
+    }
+
+    private var viewModeToggle: some View {
+        Picker("View", selection: $viewMode) {
+            ForEach(ViewMode.allCases, id: \.self) { mode in
+                Text(mode.rawValue).tag(mode)
+            }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
     }
 
     private var sortToggle: some View {

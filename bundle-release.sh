@@ -37,7 +37,7 @@ cat > "$CONTENTS_DIR/Info.plist" << PLIST
     <key>CFBundleExecutable</key>
     <string>WaveKit</string>
     <key>CFBundleIconFile</key>
-    <string>AppIcon.icns</string>
+    <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
     <string>com.wavekit.app</string>
     <key>CFBundleName</key>
@@ -59,6 +59,9 @@ cat > "$CONTENTS_DIR/Info.plist" << PLIST
 </dict>
 </plist>
 PLIST
+
+# PkgInfo — required for Finder to recognize the app type and render the icon
+printf 'APPL????' > "$CONTENTS_DIR/PkgInfo"
 
 # Ad-hoc sign (enables Gatekeeper "Open Anyway" flow on Sonoma/Sequoia)
 echo "Signing..."
