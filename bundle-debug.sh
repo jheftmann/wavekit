@@ -10,6 +10,9 @@ CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
 
+# Kill any running debug instances before rebuilding
+pkill -f 'WaveKit-Dev' 2>/dev/null || true
+
 # Build first
 swift build
 

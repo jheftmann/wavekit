@@ -5,6 +5,43 @@ enum ViewMode: String, CaseIterable {
     case today = "Today"
 }
 
+/// NSSegmentedControl wrapper that honours an explicit pixel width via setWidth(_:forSegment:).
+/// SwiftUI's Picker(.segmented) ignores proposed widths — this bypasses that limitation.
+private struct ViewModeSegmentedControl: NSViewRepresentable {
+    @Binding var selection: ViewMode
+    let width: CGFloat
+
+    func makeNSView(context: Context) -> NSSegmentedControl {
+        let control = NSSegmentedControl()
+        control.segmentCount = ViewMode.allCases.count
+        for (i, mode) in ViewMode.allCases.enumerated() {
+            control.setLabel(mode.rawValue, forSegment: i)
+        }
+        control.trackingMode = .selectOne
+        control.target = context.coordinator
+        control.action = #selector(Coordinator.changed(_:))
+        return control
+    }
+
+    func updateNSView(_ control: NSSegmentedControl, context: Context) {
+        let segW = width / CGFloat(ViewMode.allCases.count)
+        for i in 0..<ViewMode.allCases.count {
+            control.setWidth(segW, forSegment: i)
+        }
+        control.selectedSegment = ViewMode.allCases.firstIndex(of: selection) ?? 0
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    class Coordinator: NSObject {
+        var parent: ViewModeSegmentedControl
+        init(_ p: ViewModeSegmentedControl) { parent = p }
+        @objc func changed(_ sender: NSSegmentedControl) {
+            parent.selection = ViewMode.allCases[sender.selectedSegment]
+        }
+    }
+}
+
 struct MenuBarView: View {
     @ObservedObject var api: SurflineAPI
     @ObservedObject var favoritesStore: FavoritesStore
@@ -115,14 +152,12 @@ struct MenuBarView: View {
         return favoritesStore.spots
     }
 
+    // 360 window − 24 h-padding − 8 gap − 56 sort toggle = 272
+    private let viewModeToggleWidth: CGFloat = 272
+
     private var viewModeToggle: some View {
-        Picker("View", selection: $viewMode) {
-            ForEach(ViewMode.allCases, id: \.self) { mode in
-                Text(mode.rawValue).tag(mode)
-            }
-        }
-        .pickerStyle(.segmented)
-        .labelsHidden()
+        ViewModeSegmentedControl(selection: $viewMode, width: viewModeToggleWidth)
+            .frame(width: viewModeToggleWidth, height: 24)
     }
 
     private var sortToggle: some View {
