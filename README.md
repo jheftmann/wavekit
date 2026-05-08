@@ -78,6 +78,9 @@ Grant location permission when prompted to automatically sort spots by distance 
 - Increase window width to fit 6 days
 - Add debug app bundle script for development
 
+### 2026-05-08 — v1.1.1
+- Ad-hoc code signing for Gatekeeper compatibility on macOS Sonoma/Sequoia
+
 ### 2026-03-31 — v1.1.0
 - Custom app icon and menu bar icon
 - Per-spot calendar subscription via Apple Calendar / Notion Calendar (experimental)

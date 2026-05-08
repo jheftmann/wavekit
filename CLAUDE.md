@@ -65,7 +65,7 @@ See [`MEMORY.md`](./MEMORY.md) for accumulated decisions and session context.
 open .build/debug/WaveKit-Dev.app
 ```
 
-Version is stored in `VERSION` (currently `1.1.0`). Always bump it before a release, then update the download button label in `docs/index.html` and add a changelog entry.
+Version is stored in `VERSION` (currently `1.1.1`). Always bump it before a release, then update the download button label in `docs/index.html` and add a changelog entry.
 
 When shipping a new version:
 1. Bump `VERSION` file
