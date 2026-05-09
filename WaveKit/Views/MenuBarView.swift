@@ -43,6 +43,44 @@ private struct ViewModeSegmentedControl: NSViewRepresentable {
     }
 }
 
+private struct SortSegmentedControl: NSViewRepresentable {
+    @Binding var sortMode: SortMode
+
+    func makeNSView(context: Context) -> NSSegmentedControl {
+        let control = NSSegmentedControl()
+        control.segmentCount = 2
+        control.trackingMode = .selectOne
+
+        // Segment 0: distance (compass)
+        control.setImage(NSImage(systemSymbolName: "location.fill", accessibilityDescription: nil), forSegment: 0)
+        control.setWidth(28, forSegment: 0)
+        control.setToolTip("Sort by distance", forSegment: 0)
+
+        // Segment 1: manual (list)
+        control.setImage(NSImage(systemSymbolName: "list.bullet", accessibilityDescription: nil), forSegment: 1)
+        control.setWidth(28, forSegment: 1)
+        control.setToolTip("Sort manually — reorder in ⚙ Settings › Favorites", forSegment: 1)
+
+        control.target = context.coordinator
+        control.action = #selector(Coordinator.changed(_:))
+        return control
+    }
+
+    func updateNSView(_ control: NSSegmentedControl, context: Context) {
+        control.selectedSegment = sortMode == .distance ? 0 : 1
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    class Coordinator: NSObject {
+        var parent: SortSegmentedControl
+        init(_ p: SortSegmentedControl) { parent = p }
+        @objc func changed(_ sender: NSSegmentedControl) {
+            parent.sortMode = sender.selectedSegment == 0 ? .distance : .manual
+        }
+    }
+}
+
 struct MenuBarView: View {
     @ObservedObject var api: SurflineAPI
     @ObservedObject var favoritesStore: FavoritesStore
@@ -54,6 +92,7 @@ struct MenuBarView: View {
     @State private var viewMode: ViewMode = .forecast
     @State private var showingSettings = false
     @State private var draggingSpotId: String?
+    @State private var dragOverIndex: Int?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -119,101 +158,117 @@ struct MenuBarView: View {
 
     private var settingsContentView: some View {
         VStack(spacing: 0) {
-            ScrollView {
-                VStack(spacing: 0) {
-                    // Account
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Connect your Surfline account to get extended forecasts")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+            // Account
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Connect your Surfline account to get extended forecasts")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
 
-                        if authManager.isLoggedIn {
-                            HStack {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Signed in to Surfline")
-                                    if let username = authManager.username {
-                                        Text(username)
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                                Spacer()
-                                Button("Sign Out") { authManager.logout() }
-                            }
-                        } else {
-                            HStack {
-                                Image(systemName: "person.crop.circle.badge.questionmark")
+                if authManager.isLoggedIn {
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Signed in to Surfline")
+                            if let username = authManager.username {
+                                Text(username)
+                                    .font(.caption)
                                     .foregroundColor(.secondary)
-                                Text("Not signed in")
-                                Spacer()
-                                Button("Sign In") { openWindow(id: "login") }
                             }
                         }
+                        Spacer()
+                        Button("Sign Out") { authManager.logout() }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-
-                    Divider()
-
-                    // Favorite Spots
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text("Favorite Spots")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            Button {
-                                openWindow(id: "addspot")
-                            } label: {
-                                Image(systemName: "plus")
-                            }
-                        }
-
-                        if favoritesStore.spots.isEmpty {
-                            Text("No spots added yet")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .padding(.vertical, 8)
-                        } else {
-                            VStack(spacing: 0) {
-                                ForEach(favoritesStore.spots) { spot in
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "line.3.horizontal")
-                                            .foregroundColor(.secondary)
-                                            .font(.system(size: 12))
-                                        Text(spot.name)
-                                        Spacer()
-                                        settingsCalendarButton(for: spot)
-                                        settingsTrashButton(for: spot)
-                                    }
-                                    .padding(.vertical, 6)
-                                    .frame(maxWidth: .infinity)
-                                    .contentShape(Rectangle())
-                                    .opacity(draggingSpotId == spot.id ? 0.4 : 1)
-                                    .onDrag {
-                                        draggingSpotId = spot.id
-                                        return NSItemProvider(object: spot.id as NSString)
-                                    }
-                                    .onDrop(of: [UTType.text], delegate: SpotDropDelegate(
-                                        targetSpot: spot,
-                                        store: favoritesStore,
-                                        draggingSpotId: $draggingSpotId
-                                    ))
-
-                                    if spot.id != favoritesStore.spots.last?.id {
-                                        Divider()
-                                    }
-                                }
-                            }
-                        }
+                } else {
+                    HStack {
+                        Image(systemName: "person.crop.circle.badge.questionmark")
+                            .foregroundColor(.secondary)
+                        Text("Not signed in")
+                        Spacer()
+                        Button("Sign In") { openWindow(id: "login") }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+
+            Divider()
+
+            // Favorite Spots header
+            HStack {
+                Text("Favorite Spots")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                Spacer()
+                Button {
+                    openWindow(id: "addspot")
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+            .padding(.horizontal)
+            .padding(.top, 12)
+            .padding(.bottom, favoritesStore.spots.isEmpty ? 12 : 4)
+
+            // Spots list — plain VStack so onDrag/onDrop aren't blocked by ScrollView
+            if favoritesStore.spots.isEmpty {
+                Text("No spots added yet")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 8)
+                    .padding(.horizontal)
+            } else {
+                let rowH: CGFloat = 32
+                VStack(spacing: 0) {
+                    ForEach(Array(favoritesStore.spots.enumerated()), id: \.element.id) { index, spot in
+                        HStack(spacing: 8) {
+                            Image(systemName: "line.3.horizontal")
+                                .foregroundColor(.secondary)
+                                .font(.system(size: 12))
+                            Text(spot.name)
+                            Spacer()
+                            settingsCalendarButton(for: spot)
+                            settingsTrashButton(for: spot)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: rowH)
+                        .padding(.horizontal)
+                        .contentShape(Rectangle())
+                        .background(
+                            draggingSpotId == spot.id
+                                ? Color.primary.opacity(0.08)
+                                : (dragOverIndex == index && draggingSpotId != nil
+                                    ? Color.accentColor.opacity(0.08)
+                                    : Color.clear)
+                        )
+                        .gesture(
+                            DragGesture(minimumDistance: 4, coordinateSpace: .named("spotList"))
+                                .onChanged { value in
+                                    if draggingSpotId == nil { draggingSpotId = spot.id }
+                                    guard draggingSpotId == spot.id else { return }
+                                    dragOverIndex = max(0, min(favoritesStore.spots.count - 1,
+                                                               Int(value.location.y / rowH)))
+                                }
+                                .onEnded { value in
+                                    defer { draggingSpotId = nil; dragOverIndex = nil }
+                                    guard let from = favoritesStore.spots.firstIndex(where: { $0.id == spot.id }) else { return }
+                                    let to = max(0, min(favoritesStore.spots.count - 1,
+                                                        Int(value.location.y / rowH)))
+                                    guard to != from else { return }
+                                    favoritesStore.moveSpot(from: IndexSet(integer: from),
+                                                            to: to > from ? to + 1 : to)
+                                }
+                        )
+
+                        if spot.id != favoritesStore.spots.last?.id {
+                            Divider().padding(.leading)
+                        }
+                    }
+                }
+                .coordinateSpace(name: "spotList")
+            }
+
+            Spacer(minLength: 0)
 
             Divider()
 
@@ -322,16 +377,11 @@ struct MenuBarView: View {
     }
 
     private var sortToggle: some View {
-        Picker("Sort", selection: Binding(
+        SortSegmentedControl(sortMode: Binding(
             get: { favoritesStore.sortMode },
             set: { favoritesStore.setSortMode($0) }
-        )) {
-            Image(systemName: "location.fill").tag(SortMode.distance)
-            Image(systemName: "list.bullet").tag(SortMode.manual)
-        }
-        .pickerStyle(.segmented)
-        .labelsHidden()
-        .frame(width: 56)
+        ))
+        .frame(width: 56, height: 24)
     }
 
     private let rowHeight: CGFloat = 85

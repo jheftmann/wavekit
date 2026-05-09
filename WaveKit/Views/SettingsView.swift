@@ -87,12 +87,11 @@ struct SettingsView: View {
                             .padding(.vertical, 6)
                             .frame(maxWidth: .infinity)
                             .contentShape(Rectangle())
-                            .opacity(draggingSpotId == spot.id ? 0.4 : 1)
                             .onDrag {
                                 draggingSpotId = spot.id
                                 return NSItemProvider(object: spot.id as NSString)
                             }
-                            .onDrop(of: [UTType.text], delegate: SpotDropDelegate(
+                            .onDrop(of: [UTType.utf8PlainText], delegate: SpotDropDelegate(
                                 targetSpot: spot,
                                 store: favoritesStore,
                                 draggingSpotId: $draggingSpotId
@@ -182,6 +181,8 @@ struct SpotDropDelegate: DropDelegate {
 
         store.moveSpot(from: IndexSet(integer: from), to: to > from ? to + 1 : to)
     }
+
+    func validateDrop(info: DropInfo) -> Bool { true }
 
     func performDrop(info: DropInfo) -> Bool {
         draggingSpotId = nil
