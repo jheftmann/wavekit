@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 enum ViewMode: String, CaseIterable {
     case forecast = "Forecast"
@@ -47,33 +48,37 @@ struct MenuBarView: View {
     @ObservedObject var favoritesStore: FavoritesStore
     @ObservedObject var authManager: AuthManager
     @ObservedObject var locationManager: LocationManager
+    @ObservedObject private var calendarManager = CalendarManager.shared
 
     @Environment(\.openWindow) private var openWindow
     @State private var viewMode: ViewMode = .forecast
+    @State private var showingSettings = false
+    @State private var draggingSpotId: String?
 
     var body: some View {
         VStack(spacing: 0) {
             Color.clear.frame(height: 0)
                 .onAppear { NSApp.keyWindow?.makeFirstResponder(nil) }
-            // Header with toggle
+
+            // Header
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("WaveKit")
+                    Text(showingSettings ? "Settings" : "WaveKit")
                         .font(.headline)
                     Spacer()
                     Button {
-                        openWindow(id: "settings")
+                        showingSettings.toggle()
                     } label: {
-                        Label("Settings", systemImage: "gear")
+                        Label(showingSettings ? "Close" : "Settings",
+                              systemImage: showingSettings ? "xmark" : "gear")
                             .labelStyle(.iconOnly)
                     }
                     .buttonStyle(.borderless)
                     .focusEffectDisabled()
-                    .help("Settings")
+                    .help(showingSettings ? "Close Settings" : "Settings")
                 }
 
-                // View mode + sort toggles (only show if logged in and has spots)
-                if authManager.isLoggedIn && !favoritesStore.spots.isEmpty {
+                if !showingSettings && authManager.isLoggedIn && !favoritesStore.spots.isEmpty {
                     HStack(spacing: 8) {
                         viewModeToggle
                         sortToggle
@@ -86,21 +91,20 @@ struct MenuBarView: View {
 
             Divider()
 
-            // Spot List
-            if favoritesStore.spots.isEmpty {
-                emptyStateView
+            if showingSettings {
+                settingsContentView
             } else {
-                spotListView
+                if favoritesStore.spots.isEmpty {
+                    emptyStateView
+                } else {
+                    spotListView
+                }
+                Divider()
+                footerView
             }
-
-            Divider()
-
-            // Footer
-            footerView
         }
         .frame(width: 360)
         .task {
-            // Request location and fetch forecasts
             locationManager.requestLocation()
             await api.fetchForecasts(for: favoritesStore.spots)
         }
@@ -110,6 +114,162 @@ struct MenuBarView: View {
             }
         }
     }
+
+    // MARK: - Settings
+
+    private var settingsContentView: some View {
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Account
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Account")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+
+                        if authManager.isLoggedIn {
+                            HStack {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                Text("Signed in to Surfline")
+                                Spacer()
+                                Button("Sign Out") { authManager.logout() }
+                            }
+                            if let username = authManager.username {
+                                Text(username)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        } else {
+                            HStack {
+                                Image(systemName: "person.crop.circle.badge.questionmark")
+                                    .foregroundColor(.secondary)
+                                Text("Not signed in")
+                                Spacer()
+                                Button("Sign In") { openWindow(id: "login") }
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+
+                    Divider()
+
+                    // Favorite Spots
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text("Favorite Spots")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Button {
+                                openWindow(id: "addspot")
+                            } label: {
+                                Image(systemName: "plus")
+                            }
+                            .buttonStyle(.borderless)
+                        }
+
+                        if favoritesStore.spots.isEmpty {
+                            Text("No spots added yet")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(.vertical, 8)
+                        } else {
+                            VStack(spacing: 0) {
+                                ForEach(favoritesStore.spots) { spot in
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "line.3.horizontal")
+                                            .foregroundColor(.secondary)
+                                            .font(.system(size: 12))
+                                        Text(spot.name)
+                                        Spacer()
+                                        settingsCalendarButton(for: spot)
+                                        settingsTrashButton(for: spot)
+                                    }
+                                    .padding(.vertical, 6)
+                                    .frame(maxWidth: .infinity)
+                                    .contentShape(Rectangle())
+                                    .opacity(draggingSpotId == spot.id ? 0.4 : 1)
+                                    .onDrag {
+                                        draggingSpotId = spot.id
+                                        return NSItemProvider(object: spot.id as NSString)
+                                    }
+                                    .onDrop(of: [UTType.text], delegate: SpotDropDelegate(
+                                        targetSpot: spot,
+                                        store: favoritesStore,
+                                        draggingSpotId: $draggingSpotId
+                                    ))
+
+                                    if spot.id != favoritesStore.spots.last?.id {
+                                        Divider()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                }
+            }
+
+            Divider()
+
+            // Settings footer
+            HStack {
+                Text("WaveKit v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Spacer()
+                Button("Quit App") {
+                    NSApplication.shared.terminate(nil)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+        }
+        .frame(maxHeight: CGFloat(maxVisibleRows) * rowHeight + 160) // cap so ScrollView kicks in
+    }
+
+    @ViewBuilder
+    private func settingsCalendarButton(for spot: Spot) -> some View {
+        let isEnabled = calendarManager.enabledSpotIds.contains(spot.id)
+        Button {
+            if isEnabled {
+                calendarManager.disableSpot(spot.id)
+            } else {
+                Task {
+                    await calendarManager.enableSpot(
+                        spot.id,
+                        name: spot.name,
+                        forecasts: SurflineAPI.shared.forecasts
+                    )
+                }
+            }
+        } label: {
+            Image(systemName: isEnabled ? "calendar.badge.checkmark" : "calendar.badge.plus")
+                .foregroundColor(isEnabled ? .accentColor : .secondary)
+                .frame(width: 20, height: 20)
+        }
+        .buttonStyle(.borderless)
+        .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private func settingsTrashButton(for spot: Spot) -> some View {
+        Button {
+            favoritesStore.removeSpot(spot)
+        } label: {
+            Image(systemName: "trash")
+                .foregroundColor(.red)
+                .frame(width: 20, height: 20)
+        }
+        .buttonStyle(.borderless)
+        .contentShape(Rectangle())
+    }
+
+    // MARK: - Main view
 
     private var emptyStateView: some View {
         VStack(spacing: 16) {
@@ -241,7 +401,6 @@ struct MenuBarView: View {
 
     private var footerView: some View {
         HStack {
-            // Add spot button
             Button {
                 openWindow(id: "addspot")
             } label: {
@@ -254,7 +413,6 @@ struct MenuBarView: View {
 
             Spacer()
 
-            // Last updated + Refresh button
             Button {
                 Task {
                     await api.fetchForecasts(for: favoritesStore.spots)

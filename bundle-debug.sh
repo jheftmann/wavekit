@@ -3,6 +3,7 @@
 
 set -e
 
+VERSION=$(cat VERSION)
 APP_NAME="WaveKit-Dev"
 BUILD_DIR=".build/debug"
 APP_DIR="$BUILD_DIR/$APP_NAME.app"
@@ -29,7 +30,7 @@ cp -r "$BUILD_DIR/WaveKit_WaveKit.bundle" "$RESOURCES_DIR/"
 cp "WaveKit/Resources/Images/AppIcon.icns" "$RESOURCES_DIR/AppIcon.icns"
 
 # Create Info.plist
-cat > "$CONTENTS_DIR/Info.plist" << 'PLIST'
+cat > "$CONTENTS_DIR/Info.plist" << PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -45,9 +46,9 @@ cat > "$CONTENTS_DIR/Info.plist" << 'PLIST'
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>$VERSION</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>$VERSION</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>LSUIElement</key>

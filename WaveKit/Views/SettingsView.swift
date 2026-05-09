@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -6,6 +7,7 @@ struct SettingsView: View {
     @ObservedObject var authManager: AuthManager
     @ObservedObject var favoritesStore: FavoritesStore
     @ObservedObject private var calendarManager = CalendarManager.shared
+    @State private var draggingSpotId: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -84,6 +86,18 @@ struct SettingsView: View {
                             }
                             .padding(.vertical, 6)
                             .frame(maxWidth: .infinity)
+                            .contentShape(Rectangle())
+                            .opacity(draggingSpotId == spot.id ? 0.4 : 1)
+                            .onDrag {
+                                draggingSpotId = spot.id
+                                return NSItemProvider(object: spot.id as NSString)
+                            }
+                            .onDrop(of: [UTType.text], delegate: SpotDropDelegate(
+                                targetSpot: spot,
+                                store: favoritesStore,
+                                draggingSpotId: $draggingSpotId
+                            ))
+
                             if spot.id != favoritesStore.spots.last?.id {
                                 Divider()
                             }
@@ -147,6 +161,31 @@ struct SettingsView: View {
         }
         .buttonStyle(.borderless)
         .contentShape(Rectangle())
+    }
+}
+
+struct SpotDropDelegate: DropDelegate {
+    let targetSpot: Spot
+    let store: FavoritesStore
+    @Binding var draggingSpotId: String?
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func dropEntered(info: DropInfo) {
+        guard let draggingId = draggingSpotId,
+              draggingId != targetSpot.id,
+              let from = store.spots.firstIndex(where: { $0.id == draggingId }),
+              let to = store.spots.firstIndex(where: { $0.id == targetSpot.id })
+        else { return }
+
+        store.moveSpot(from: IndexSet(integer: from), to: to > from ? to + 1 : to)
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        draggingSpotId = nil
+        return true
     }
 }
 
