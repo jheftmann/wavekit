@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-WaveKit is a macOS menu bar app (Swift/SwiftUI, macOS 14+) that shows surf forecasts from the Surfline API for saved favorite spots. Current version: **1.1.2**.
+WaveKit is a macOS menu bar app (Swift/SwiftUI, macOS 14+) that shows surf forecasts from the Surfline API for saved favorite spots. Current version: **1.1.3**.
 
 GitHub: https://github.com/jheftmann/wavekit
 
@@ -65,7 +65,7 @@ See [`MEMORY.md`](./MEMORY.md) for accumulated decisions and session context.
 open .build/debug/WaveKit-Dev.app
 ```
 
-Version is stored in `VERSION` (currently `1.1.2`). Always bump it before a release, then update the download button label in `docs/index.html` and add a changelog entry.
+Version is stored in `VERSION` (currently `1.1.3`). Always bump it before a release, then update the download button label in `docs/index.html` and add a changelog entry.
 
 When shipping a new version:
 1. Bump `VERSION` file

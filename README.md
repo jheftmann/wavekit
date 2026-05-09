@@ -78,6 +78,10 @@ Grant location permission when prompted to automatically sort spots by distance 
 - Increase window width to fit 6 days
 - Add debug app bundle script for development
 
+### 2026-05-09 — v1.1.3
+- Settings UI polish: "Connect your Surfline account" description, consistent button styles
+- Debug builds now show correct version number from VERSION file
+
 ### 2026-05-08 — v1.1.2
 - Forecast/Today toggle now spans exact calculated width (272pt) using NSViewRepresentable
 - "Add Spot" button shows "Added!" on success, then clears field and refocuses after 1.2s

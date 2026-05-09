@@ -123,7 +123,7 @@ struct MenuBarView: View {
                 VStack(spacing: 0) {
                     // Account
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Account")
+                        Text("Connect your Surfline account to get extended forecasts")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
 
@@ -167,7 +167,6 @@ struct MenuBarView: View {
                             } label: {
                                 Image(systemName: "plus")
                             }
-                            .buttonStyle(.borderless)
                         }
 
                         if favoritesStore.spots.isEmpty {
