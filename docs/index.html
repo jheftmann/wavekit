@@ -438,8 +438,21 @@
     <p>These are experimental tools developed by <a href="https://www.jacobheftmann.com" target="_blank" rel="noopener"><strong>Jacob Heftmann</strong></a>. They're not officially endorsed or supported by Surfline, the WSL, or any other entity. Use them and be nice. For feature requests, bugs, etc., go to <a href="https://github.com/jheftmann/wavekit/issues" target="_blank" rel="noopener"><strong>GitHub Issues</strong></a>.</p>
     <p>🏄‍♂️ Be respectful, share waves, and protect the ocean.</p>
     <p><a href="terms.html">Terms of Use</a></p>
+    <p id="dl-count" style="color:#999;font-size:13px;margin-top:4px"></p>
   </div>
 
 </div>
+
+<script>
+  fetch('https://api.github.com/repos/jheftmann/wavekit/releases/latest')
+    .then(r => r.json())
+    .then(data => {
+      const count = (data.assets || []).reduce((sum, a) => sum + a.download_count, 0);
+      if (count > 0) {
+        document.getElementById('dl-count').textContent = count.toLocaleString() + ' downloads';
+      }
+    })
+    .catch(() => {});
+</script>
 </body>
 </html>
