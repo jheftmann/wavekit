@@ -7,7 +7,7 @@ Accumulated decisions and context from past sessions.
 ## Past Decisions
 
 - Renamed from SurflineFavorites → WaveKit (2025-01-22)
-- `docs/` is the GitHub Pages root (not `website/` — that folder only holds ZIPs)
+- `docs/` is the GitHub Pages root (`website/` folder was deleted — it was vestigial, only held old ZIPs)
 - WSL 2026 CT calendar subscription added to `docs/` as a standalone sub-project; hosted at `jheftmann.github.io/wavekit/wsl-2026-ct.ics`
 - Calendar section added to top of `docs/index.html` above the WaveKit app section
 - Surfline API used without an official key (reverse-engineered endpoints from surfline.com)
@@ -30,3 +30,6 @@ Accumulated decisions and context from past sessions.
 - Release app is ad-hoc signed (`codesign --force --deep --sign -`) before packaging; enables Gatekeeper "Open Anyway" flow on macOS Sonoma/Sequoia for downloaded ZIPs (2026-05-08)
 - Settings are inline in the main popover (not a separate window); gear icon toggles to X to close (2026-05-09)
 - Account section in settings: checkmark icon + VStack(alignment: .leading) with "Signed in to Surfline" and username (caption, secondary) stacked, then Spacer, then Sign Out button — all in one HStack. Username must stay inside the VStack, not outside the HStack (2026-05-09)
+- Drag-to-reorder in settings uses DragGesture with coordinateSpace; must NOT call moveSpot during onChanged (causes re-render that cancels gesture) — commit move in onEnded only; dragOverIndex tracks hover target for accent highlight (2026-05-09)
+- Release ZIPs now on GitHub Releases (not docs/); download button points to /releases/latest/download/WaveKit.zip — asset must be named WaveKit.zip on upload; bundle-release.sh outputs ZIP to project root (2026-05-09)
+- Live download count shown in website footer — fetches GitHub API client-side, hidden when count is 0 (2026-05-09)
