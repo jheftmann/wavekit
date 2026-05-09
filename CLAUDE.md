@@ -57,15 +57,14 @@ See [`MEMORY.md`](./MEMORY.md) for accumulated decisions and session context.
 # 2. Build, sign, and package (all-in-one)
 ./bundle-release.sh
 # Outputs: .build/release/WaveKit.app (ad-hoc signed)
-#          docs/WaveKit-<version>.zip
-#          docs/WaveKit.zip
+#          WaveKit-<version>.zip  ← upload to GitHub Releases as an asset named WaveKit.zip
 
 # 3. Debug app bundle (needed for location permissions during development)
 ./bundle-debug.sh
 open .build/debug/WaveKit-Dev.app
 ```
 
-Version is stored in `VERSION` (currently `1.1.4`). Always bump it before a release, then update the download button label in `docs/index.html` and add a changelog entry.
+Version is stored in `VERSION` (currently `1.1.5`). Always bump it before a release, then add a changelog entry and upload the ZIP to GitHub Releases (the download button in `docs/index.html` always points to `/releases/latest/download/WaveKit.zip`, so no URL update needed — just make sure the release asset is named `WaveKit.zip`).
 
 When shipping a new version:
 1. Bump `VERSION` file

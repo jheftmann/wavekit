@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build and package WaveKit release app bundle
 # Usage: ./bundle-release.sh
-# Output: .build/release/WaveKit.app (signed), docs/WaveKit-<version>.zip, docs/WaveKit.zip
+# Output: .build/release/WaveKit.app (signed), WaveKit-<version>.zip (project root)
 
 set -e
 
@@ -67,15 +67,13 @@ printf 'APPL????' > "$CONTENTS_DIR/PkgInfo"
 echo "Signing..."
 codesign --force --deep --sign - "$APP_DIR"
 
-# Package ZIP
+# Package ZIP (output to project root for GitHub Releases upload)
 echo "Packaging..."
 REPO_ROOT="$(pwd)"
 cd "$BUILD_DIR"
-zip -r "${REPO_ROOT}/docs/WaveKit-${VERSION}.zip" WaveKit.app
+zip -r "${REPO_ROOT}/WaveKit-${VERSION}.zip" WaveKit.app
 cd "$REPO_ROOT"
-cp "docs/WaveKit-${VERSION}.zip" docs/WaveKit.zip
 
 echo ""
 echo "Done: $APP_DIR (signed)"
-echo "      docs/WaveKit-${VERSION}.zip"
-echo "      docs/WaveKit.zip"
+echo "      WaveKit-${VERSION}.zip  ← upload this to GitHub Releases"
