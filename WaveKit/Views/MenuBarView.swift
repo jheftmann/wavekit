@@ -131,14 +131,16 @@ struct MenuBarView: View {
                             HStack {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(.green)
-                                Text("Signed in to Surfline")
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Signed in to Surfline")
+                                    if let username = authManager.username {
+                                        Text(username)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
                                 Spacer()
                                 Button("Sign Out") { authManager.logout() }
-                            }
-                            if let username = authManager.username {
-                                Text(username)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
                             }
                         } else {
                             HStack {

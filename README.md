@@ -78,6 +78,9 @@ Grant location permission when prompted to automatically sort spots by distance 
 - Increase window width to fit 6 days
 - Add debug app bundle script for development
 
+### 2026-05-09 — v1.1.4
+- Fix account email display in settings (was floating outside the row)
+
 ### 2026-05-09 — v1.1.3
 - Settings UI polish: "Connect your Surfline account" description, consistent button styles
 - Debug builds now show correct version number from VERSION file

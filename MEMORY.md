@@ -28,3 +28,5 @@ Accumulated decisions and context from past sessions.
 - `screenshots/` and `docs/WaveKit-*.zip` are .gitignored (local working files)
 - Website two-column layout at ≥1100px breakpoint; single column below
 - Release app is ad-hoc signed (`codesign --force --deep --sign -`) before packaging; enables Gatekeeper "Open Anyway" flow on macOS Sonoma/Sequoia for downloaded ZIPs (2026-05-08)
+- Settings are inline in the main popover (not a separate window); gear icon toggles to X to close (2026-05-09)
+- Account section in settings: checkmark icon + VStack(alignment: .leading) with "Signed in to Surfline" and username (caption, secondary) stacked, then Spacer, then Sign Out button — all in one HStack. Username must stay inside the VStack, not outside the HStack (2026-05-09)
