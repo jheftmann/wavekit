@@ -48,12 +48,13 @@ struct WaveKitApp: App {
         .windowResizability(.contentSize)
         .defaultPosition(.center)
 
-        // Login Window
+        // Login Window — sized to fit the embedded Surfline web login
         Window("Sign In", id: "login") {
             LoginView(authManager: authManager)
                 .enableKeyboardInput()
         }
         .windowResizability(.contentSize)
+        .defaultSize(width: 480, height: 620)
         .defaultPosition(.center)
 
         // Add Spot Window

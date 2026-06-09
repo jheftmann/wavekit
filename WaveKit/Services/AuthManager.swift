@@ -104,6 +104,42 @@ final class AuthManager: ObservableObject {
         }
     }
 
+    /// Called by SurflineWebLoginView after intercepting the token from the
+    /// Surfline website — no client credentials needed.
+    func loginWithWebToken(accessToken: String, refreshToken: String, expiresIn: Int) {
+        let token = TokenInfo(
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            expirationDate: Date().addingTimeInterval(TimeInterval(expiresIn))
+        )
+
+        try? keychain.saveToken(token)
+        // Extract username from token if possible (JWT payload), else mark as logged in
+        let email = decodeEmailFromJWT(accessToken) ?? "Surfline User"
+        keychain.saveUsername(email)
+
+        tokenInfo = token
+        username = email
+        isLoggedIn = true
+    }
+
+    /// Best-effort JWT payload decode to extract the email/sub claim.
+    private func decodeEmailFromJWT(_ jwt: String) -> String? {
+        let parts = jwt.components(separatedBy: ".")
+        guard parts.count == 3 else { return nil }
+        var payload = parts[1]
+        // Base64url → Base64
+        payload = payload
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+        let rem = payload.count % 4
+        if rem != 0 { payload += String(repeating: "=", count: 4 - rem) }
+        guard let data = Data(base64Encoded: payload),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else { return nil }
+        return json["email"] as? String ?? json["sub"] as? String
+    }
+
     func logout() {
         keychain.deleteToken()
         keychain.deleteUsername()

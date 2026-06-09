@@ -78,6 +78,9 @@ Grant location permission when prompted to automatically sort spots by distance 
 - Increase window width to fit 6 days
 - Add debug app bundle script for development
 
+### 2026-06-08 — v1.1.6
+- Fix Surfline sign-in: replaced broken credential-based auth with a WKWebView login that loads surfline.com and intercepts the token via a JS hook — no hardcoded client credentials needed
+
 ### 2026-05-09 — v1.1.5
 - Fix drag-to-reorder for favorite spots in settings
 - Downloads now served via GitHub Releases
