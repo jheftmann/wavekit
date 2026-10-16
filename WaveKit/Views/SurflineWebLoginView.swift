@@ -169,19 +169,40 @@ struct SurflineWebLoginView: NSViewRepresentable {
         private var localStorageScript: String {
             """
             (function() {
-                var keys = [
+                function extractToken(obj) {
+                    if (!obj) return null;
+                    if (obj.access_token) return JSON.stringify(obj);
+                    if (obj.token && obj.token.access_token) return JSON.stringify(obj.token);
+                    return null;
+                }
+                var known = [
                     'SL.Auth', 'SURFLINE_USER', 'sl_user', 'USER_ACCESS_TOKEN',
                     'auth_token', 'surfline_auth'
                 ];
-                for (var i = 0; i < keys.length; i++) {
+                for (var i = 0; i < known.length; i++) {
                     try {
-                        var raw = localStorage.getItem(keys[i]);
+                        var raw = localStorage.getItem(known[i]);
                         if (!raw) continue;
-                        var obj = JSON.parse(raw);
-                        if (obj && obj.access_token) return JSON.stringify(obj);
-                        // Some keys wrap under a nested key
-                        if (obj && obj.token && obj.token.access_token)
-                            return JSON.stringify(obj.token);
+                        var result = extractToken(JSON.parse(raw));
+                        if (result) return result;
+                    } catch(e) {}
+                }
+                for (var j = 0; j < localStorage.length; j++) {
+                    try {
+                        var key = localStorage.key(j);
+                        var raw = localStorage.getItem(key);
+                        if (!raw || raw[0] !== '{') continue;
+                        var result = extractToken(JSON.parse(raw));
+                        if (result) return result;
+                    } catch(e) {}
+                }
+                for (var k = 0; k < sessionStorage.length; k++) {
+                    try {
+                        var key = sessionStorage.key(k);
+                        var raw = sessionStorage.getItem(key);
+                        if (!raw || raw[0] !== '{') continue;
+                        var result = extractToken(JSON.parse(raw));
+                        if (result) return result;
                     } catch(e) {}
                 }
                 return null;
