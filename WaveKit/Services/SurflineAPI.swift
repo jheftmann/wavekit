@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import os
 
 enum APIError: LocalizedError {
     case networkError(Error)
@@ -134,7 +135,7 @@ final class SurflineAPI: ObservableObject {
             let targetTimestamp = Int(targetDate.timeIntervalSince1970)
 
             // Find closest wave entry
-            let waveEntry = wave?.data?.wave?.min(by: { entry1, entry2 in
+            let waveEntry = wave?.data?.surf?.min(by: { entry1, entry2 in
                 abs(entry1.timestamp - targetTimestamp) < abs(entry2.timestamp - targetTimestamp)
             })
 
@@ -207,7 +208,7 @@ final class SurflineAPI: ObservableObject {
         var dayData: [Date: (waves: [WaveEntry], ratings: [RatingEntry])] = [:]
 
         // Process wave entries
-        if let waveEntries = wave?.data?.wave {
+        if let waveEntries = wave?.data?.surf {
             for entry in waveEntries {
                 let date = Date(timeIntervalSince1970: TimeInterval(entry.timestamp))
                 let dayStart = calendar.startOfDay(for: date)
@@ -281,10 +282,12 @@ final class SurflineAPI: ObservableObject {
     }
 
     private func fetchWave(spotId: String, days: Int = 1) async -> WaveForecastResponse? {
-        await fetch(
-            endpoint: "wave",
+        // Surfline renamed /wave → /surf (confirmed via browser network inspector)
+        return await fetch(
+            endpoint: "surf",
             spotId: spotId,
             days: days,
+            extraParams: "&intervalHours=1&cacheEnabled=true&units%5BwaveHeight%5D=FT",
             responseType: WaveForecastResponse.self
         )
     }
@@ -320,9 +323,10 @@ final class SurflineAPI: ObservableObject {
         endpoint: String,
         spotId: String,
         days: Int = 1,
+        extraParams: String = "",
         responseType: T.Type
     ) async -> T? {
-        let url = URL(string: "\(baseURL)/\(endpoint)?spotId=\(spotId)&days=\(days)")!
+        let url = URL(string: "\(baseURL)/\(endpoint)?spotId=\(spotId)&days=\(days)\(extraParams)")!
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -350,12 +354,16 @@ final class SurflineAPI: ObservableObject {
             }
 
             guard httpResponse.statusCode == 200 else {
+                Logger(subsystem: "com.wavekit.app", category: "API").error(
+                    "HTTP \(httpResponse.statusCode) for \(endpoint, privacy: .public)")
                 return nil
             }
 
-            return try JSONDecoder().decode(T.self, from: data)
+            let decoded = try JSONDecoder().decode(T.self, from: data)
+            return decoded
         } catch {
-            print("API Error for \(endpoint): \(error)")
+            Logger(subsystem: "com.wavekit.app", category: "API").error(
+                "Request failed for \(endpoint, privacy: .public): \(error.localizedDescription, privacy: .public)")
             return nil
         }
     }

@@ -36,7 +36,8 @@ See [`MEMORY.md`](./MEMORY.md) for accumulated decisions and session context.
 
 ### Notes
 - Changelog lives in `README.md` (not a separate `CHANGELOG.md`) — add entries under a new date heading.
-- **If the next task is a significantly different feature from the current branch:** ask before starting — "This is unrelated to the current branch. Should I create a new branch first?"
+- **At the start of every session, check the current branch and ask:** "We're on `[branch]`. Work here, or switch to main (or another branch)?" — always confirm before starting work.
+- The `trip-planner` branch has unfinished work (surf trip planner web tool at `docs/trip-planner/`) — it's intentionally left dangling for now.
 
 ### Session Startup
 

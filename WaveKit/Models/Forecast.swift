@@ -25,7 +25,7 @@ struct LocationInfo: Codable {
 }
 
 struct WaveData: Codable {
-    let wave: [WaveEntry]?
+    let surf: [WaveEntry]?
 }
 
 struct WaveEntry: Codable {
@@ -35,8 +35,8 @@ struct WaveEntry: Codable {
 }
 
 struct SurfInfo: Codable {
-    let min: Double
-    let max: Double
+    let min: Double?
+    let max: Double?
     let plus: Bool?
     let humanRelation: String?
 }

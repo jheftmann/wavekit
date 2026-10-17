@@ -11,7 +11,7 @@ struct LoginView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Sign in to Surfline")
                         .font(.headline)
-                    Text("Click \"Log In\" in the navigation bar below")
+                    Text("Log in at surfline.com below to connect your account")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

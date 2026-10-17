@@ -10,6 +10,7 @@ struct SurflineWebLoginView: NSViewRepresentable {
 
     func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
+        config.websiteDataStore = .nonPersistent()
         let contentController = WKUserContentController()
 
         // Inject intercept script before any page JS runs
@@ -45,19 +46,56 @@ struct SurflineWebLoginView: NSViewRepresentable {
     /// Overrides fetch and XHR at document-start so we see the response
     /// from Surfline's POST to /trusted/token, then posts the token JSON
     /// back to Swift via webkit.messageHandlers.authToken.
+    /// Also captures Bearer tokens from outgoing request headers (for already-logged-in sessions).
     private var interceptScript: String {
         """
         (function() {
+            function jwtExpiresIn(token) {
+                try {
+                    var payload = JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+                    if (payload.exp && payload.iat) return payload.exp - payload.iat;
+                    if (payload.exp) return Math.max(payload.exp - Math.floor(Date.now()/1000), 60);
+                } catch(e) {}
+                return 3600;
+            }
+
+            function postBearer(token) {
+                if (!token || !token.startsWith('ey') || window.__wkBearerPosted) return;
+                window.__wkBearerPosted = true;
+                window.webkit.messageHandlers.authToken.postMessage(JSON.stringify({
+                    access_token: token,
+                    refresh_token: '',
+                    expires_in: jwtExpiresIn(token),
+                    token_type: 'Bearer'
+                }));
+            }
+
+            function extractBearer(headers) {
+                try {
+                    var auth = '';
+                    if (!headers) return;
+                    if (typeof headers.get === 'function') {
+                        auth = headers.get('Authorization') || headers.get('authorization') || '';
+                    } else {
+                        auth = headers['Authorization'] || headers['authorization'] || '';
+                    }
+                    if (auth.startsWith('Bearer ey')) postBearer(auth.slice(7));
+                } catch(e) {}
+            }
+
             // --- fetch intercept ---
             const _fetch = window.fetch;
             window.fetch = function(...args) {
                 const reqUrl = typeof args[0] === 'string'
                     ? args[0]
                     : (args[0] && args[0].url ? args[0].url : '');
+                // Capture outgoing Bearer token (already-logged-in sessions)
+                if (args[1] && args[1].headers) extractBearer(args[1].headers);
                 return _fetch.apply(this, args).then(function(response) {
                     if (reqUrl.includes('/trusted/token')) {
                         response.clone().json().then(function(data) {
                             if (data && data.access_token) {
+                                window.__wkBearerPosted = true;
                                 window.webkit.messageHandlers.authToken
                                     .postMessage(JSON.stringify(data));
                             }
@@ -70,10 +108,18 @@ struct SurflineWebLoginView: NSViewRepresentable {
             // --- XMLHttpRequest intercept ---
             const _open = XMLHttpRequest.prototype.open;
             const _send = XMLHttpRequest.prototype.send;
+            const _setHeader = XMLHttpRequest.prototype.setRequestHeader;
 
             XMLHttpRequest.prototype.open = function(method, url) {
                 this._wkUrl = url;
                 return _open.apply(this, arguments);
+            };
+
+            XMLHttpRequest.prototype.setRequestHeader = function(name, value) {
+                if (name.toLowerCase() === 'authorization' && value.startsWith('Bearer ey')) {
+                    postBearer(value.slice(7));
+                }
+                return _setHeader.apply(this, arguments);
             };
 
             XMLHttpRequest.prototype.send = function() {
@@ -84,6 +130,7 @@ struct SurflineWebLoginView: NSViewRepresentable {
                         try {
                             var data = JSON.parse(xhr.responseText);
                             if (data && data.access_token) {
+                                window.__wkBearerPosted = true;
                                 window.webkit.messageHandlers.authToken
                                     .postMessage(xhr.responseText);
                             }
@@ -143,29 +190,36 @@ struct SurflineWebLoginView: NSViewRepresentable {
             // If the page landed on the home feed (not /login), the user was
             // already logged in — try extracting token from localStorage instead.
             if !url.contains("/login") && !url.contains("/register") {
-                webView.evaluateJavaScript(localStorageScript) { [weak self] result, _ in
-                    guard let self,
-                          !self.tokenReceived,
-                          let json = result as? String,
-                          let data = json.data(using: .utf8),
-                          let authResponse = try? JSONDecoder().decode(AuthResponse.self, from: data)
-                    else { return }
-
-                    self.tokenReceived = true
-                    Task { @MainActor in
-                        self.authManager.loginWithWebToken(
-                            accessToken: authResponse.accessToken,
-                            refreshToken: authResponse.refreshToken,
-                            expiresIn: authResponse.expiresIn
-                        )
-                        self.onDismiss()
-                    }
+                tryExtractFromStorage(webView: webView)
+                // Retry after a brief delay — the SPA may store the token asynchronously
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                    guard let self, !self.tokenReceived else { return }
+                    self.tryExtractFromStorage(webView: webView)
                 }
             }
         }
 
-        /// Try several localStorage keys that Surfline has used for storing
-        /// the auth token, returning the first matching value as JSON.
+        func tryExtractFromStorage(webView: WKWebView) {
+            webView.evaluateJavaScript(localStorageScript) { [weak self] result, _ in
+                guard let self,
+                      !self.tokenReceived,
+                      let json = result as? String,
+                      let data = json.data(using: .utf8),
+                      let authResponse = try? JSONDecoder().decode(AuthResponse.self, from: data)
+                else { return }
+
+                self.tokenReceived = true
+                Task { @MainActor in
+                    self.authManager.loginWithWebToken(
+                        accessToken: authResponse.accessToken,
+                        refreshToken: authResponse.refreshToken,
+                        expiresIn: authResponse.expiresIn
+                    )
+                    self.onDismiss()
+                }
+            }
+        }
+
         private var localStorageScript: String {
             """
             (function() {
