@@ -78,6 +78,10 @@ Grant location permission when prompted to automatically sort spots by distance 
 - Increase window width to fit 6 days
 - Add debug app bundle script for development
 
+### 2026-10-17 — v1.1.7
+- Fix wave height display: Surfline renamed their API endpoint from `/wave` to `/surf`; updated endpoint URL and JSON model key accordingly
+- Fix sign-in reliability: WKWebView now uses a non-persistent (ephemeral) session so the login sheet always starts fresh and the auth token intercept works reliably
+
 ### 2026-06-08 — v1.1.6
 - Fix Surfline sign-in: replaced broken credential-based auth with a WKWebView login that loads surfline.com and intercepts the token via a JS hook — no hardcoded client credentials needed
 
