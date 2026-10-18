@@ -39,6 +39,10 @@ See [`MEMORY.md`](./MEMORY.md) for accumulated decisions and session context.
 - **At the start of every session, check the current branch and ask:** "We're on `[branch]`. Work here, or switch to main (or another branch)?" — always confirm before starting work.
 - The `trip-planner` branch has unfinished work (surf trip planner web tool at `docs/trip-planner/`) — it's intentionally left dangling for now.
 
+### Branching
+- Follow global branching rules (feature branch + PR; hotfix exception — ask first).
+- The post-commit release hook fires on merges to `main`, so releases land automatically on PR merge.
+
 ### Session Startup
 
 **GitHub:** https://github.com/jheftmann/wavekit
